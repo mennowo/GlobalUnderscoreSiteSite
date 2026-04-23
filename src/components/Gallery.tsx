@@ -1,14 +1,8 @@
 import { Content } from '../lib/api';
 import EditableText from './EditableText';
+import ImageUpload from './ImageUpload';
 
 type EditCtx = { canEdit: boolean; setField: (path: string[], value: string) => void };
-
-const placeholders = [
-  { src: 'https://picsum.photos/seed/ci-duet/800/1000', alt: 'Two dancers sharing weight' },
-  { src: 'https://picsum.photos/seed/ci-roll/900/700', alt: 'Rolling on a wooden floor' },
-  { src: 'https://picsum.photos/seed/ci-lift/700/900', alt: 'A tender lift' },
-  { src: 'https://picsum.photos/seed/ci-group/900/700', alt: 'A group dancing together' },
-];
 
 export default function Gallery({
   gallery,
@@ -37,12 +31,16 @@ export default function Gallery({
       </div>
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4">
         <figure className="col-span-2 md:col-span-4 row-span-2 relative rounded-3xl overflow-hidden shadow-soft group">
-          <img
-            src="/samdrubling.jpg"
-            alt="Samdrubling studio space"
-            className="w-full h-full object-cover aspect-[4/3] transition duration-700 group-hover:scale-[1.02]"
+          <ImageUpload
+            canEdit={edit.canEdit}
+            url={gallery.venueImage.url}
+            alt={gallery.venueImage.alt}
+            onChange={(v) => edit.setField(['gallery', 'venueImage', 'url'], v)}
+            onAltChange={(v) => edit.setField(['gallery', 'venueImage', 'alt'], v)}
+            className="w-full h-full"
+            imgClassName="w-full h-full object-cover aspect-[4/3] transition duration-700 group-hover:scale-[1.02]"
           />
-          <figcaption className="absolute bottom-3 left-3 chip !bg-white/90 text-xs">
+          <figcaption className="absolute bottom-3 left-3 chip !bg-white/90 text-xs z-10">
             <EditableText
               canEdit={edit.canEdit}
               value={gallery.venueCaption}
@@ -50,18 +48,21 @@ export default function Gallery({
             />
           </figcaption>
         </figure>
-        {placeholders.map((p, i) => (
+        {gallery.images.map((p, i) => (
           <figure
             key={i}
             className={`relative rounded-2xl overflow-hidden shadow-soft ${
               i % 2 === 0 ? 'md:rotate-[-0.6deg]' : 'md:rotate-[0.4deg]'
             }`}
           >
-            <img
-              src={p.src}
+            <ImageUpload
+              canEdit={edit.canEdit}
+              url={p.url}
               alt={p.alt}
-              loading="lazy"
-              className="w-full h-full object-cover aspect-[4/5]"
+              onChange={(v) => edit.setField(['gallery', 'images', String(i), 'url'], v)}
+              onAltChange={(v) => edit.setField(['gallery', 'images', String(i), 'alt'], v)}
+              className="w-full h-full"
+              imgClassName="w-full h-full object-cover aspect-[4/5]"
             />
           </figure>
         ))}

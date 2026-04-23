@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:3010',
       '/auth': 'http://localhost:3010',
+      '/uploads': 'http://localhost:3010',
       '/me': 'http://localhost:3010',
     },
   },

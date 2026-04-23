@@ -8,7 +8,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3010
-      - BASE_URL=${BASE_URL}
+      - BASE_URL=${COOLIFY_URL}
       - SESSION_SECRET=${SESSION_SECRET}
       - OIDC_ISSUER=${OIDC_ISSUER}
       - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
@@ -16,6 +16,12 @@ services:
       - ADMIN_EMAILS=${ADMIN_EMAILS}
     volumes:
       - gu-data:/app/data
+    networks:
+      - coolify
 
 volumes:
   gu-data:
+
+networks:
+  coolify:
+    external: true

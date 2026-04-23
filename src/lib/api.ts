@@ -1,4 +1,6 @@
 export type Content = {
+  header: { brand: string };
+  footer: { brand: string; tagline: string };
   hero: {
     eyebrow: string;
     title: string;
@@ -7,6 +9,7 @@ export type Content = {
     sublabel: string;
     signupCta: string;
     aboutCta: string;
+    logoUrl: string;
   };
   about: { heading: string; body: string };
   what: { heading: string; body: string };
@@ -15,6 +18,8 @@ export type Content = {
     subtitle: string;
     venueCaption: string;
     caption: string;
+    venueImage: { url: string; alt: string };
+    images: Array<{ url: string; alt: string }>;
   };
   event: {
     heroLine1: string;
@@ -74,6 +79,20 @@ export async function saveContent(next: Content): Promise<void> {
     body: JSON.stringify(next),
   });
   if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'save failed');
+}
+
+export async function uploadImage(file: File): Promise<{ url: string }> {
+  const r = await fetch('/api/uploads', {
+    method: 'POST',
+    headers: { 'content-type': file.type || 'application/octet-stream' },
+    credentials: 'same-origin',
+    body: file,
+  });
+  if (!r.ok) {
+    const msg = (await r.json().catch(() => ({}))).error || 'upload failed';
+    throw new Error(msg);
+  }
+  return r.json();
 }
 
 export async function submitSignup(payload: {

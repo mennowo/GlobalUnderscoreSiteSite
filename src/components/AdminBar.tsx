@@ -1,7 +1,12 @@
-import { Me } from '../lib/api';
+import { Content, Me } from '../lib/api';
+import EditableText from './EditableText';
+
+type EditCtx = { canEdit: boolean; setField: (path: string[], value: string) => void };
 
 type Props = {
   me: Me;
+  header: Content['header'];
+  edit: EditCtx;
   editing: boolean;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
   onStartEdit: () => void;
@@ -12,6 +17,8 @@ type Props = {
 
 export default function AdminBar({
   me,
+  header,
+  edit,
   editing,
   saveState,
   onStartEdit,
@@ -35,7 +42,12 @@ export default function AdminBar({
   return (
     <div className="sticky top-0 z-50 bg-white/60 backdrop-blur border-b border-ink/5">
       <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3 text-sm">
-        <span className="font-display text-base">◯ Global Underscore</span>
+        <EditableText
+          canEdit={edit.canEdit}
+          value={header.brand}
+          onChange={(v) => edit.setField(['header', 'brand'], v)}
+          className="font-display text-base"
+        />
         <div className="flex-1" />
         {loggedIn && isAdmin && !editing && (
           <>

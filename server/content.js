@@ -6,6 +6,13 @@ const KEY = 'site_content';
 const LEGACY_FILE = path.join(DATA_DIR, 'content.json');
 
 export const defaultContent = {
+  header: {
+    brand: '◯ Global Underscore',
+  },
+  footer: {
+    brand: '◯ Global Underscore · Vienna',
+    tagline: 'Summer solstice · 20 June 2026',
+  },
   hero: {
     eyebrow: 'Summer solstice · 20 June 2026',
     title: 'Global Underscore',
@@ -15,6 +22,7 @@ export const defaultContent = {
     sublabel: 'scroll · roll · gather',
     signupCta: 'sign up →',
     aboutCta: "what's an Underscore?",
+    logoUrl: '/logo.svg',
   },
   about: {
     heading: 'What is the Underscore?',
@@ -32,6 +40,13 @@ export const defaultContent = {
     venueCaption: 'Samdrubling · Vienna',
     caption:
       "Placeholder dance images — we'll swap these for real photos as we get them.",
+    venueImage: { url: '/samdrubling.jpg', alt: 'Samdrubling studio space' },
+    images: [
+      { url: 'https://picsum.photos/seed/ci-duet/800/1000', alt: 'Two dancers sharing weight' },
+      { url: 'https://picsum.photos/seed/ci-roll/900/700', alt: 'Rolling on a wooden floor' },
+      { url: 'https://picsum.photos/seed/ci-lift/700/900', alt: 'A tender lift' },
+      { url: 'https://picsum.photos/seed/ci-group/900/700', alt: 'A group dancing together' },
+    ],
   },
   event: {
     heroLine1: 'One afternoon.',

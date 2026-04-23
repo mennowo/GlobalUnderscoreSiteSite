@@ -12,6 +12,7 @@ import {
   signupsAsCsv,
 } from './signups.js';
 import { issueChallenge, verifyChallenge } from './captcha.js';
+import { saveUpload, UPLOADS_DIR, UPLOAD_LIMIT } from './uploads.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -99,6 +100,28 @@ app.put('/api/content', requireAdmin, async (req, res) => {
   }
 });
 
+app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '1h', fallthrough: false }));
+
+app.post(
+  '/api/uploads',
+  requireAdmin,
+  express.raw({
+    type: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
+    limit: UPLOAD_LIMIT,
+  }),
+  async (req, res) => {
+    try {
+      if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+        return res.status(400).json({ error: 'empty or non-binary body' });
+      }
+      const info = await saveUpload(req.body, req.headers['content-type']);
+      res.json(info);
+    } catch (err) {
+      res.status(400).json({ error: String(err.message || err) });
+    }
+  },
+);
+
 app.get('/api/challenge', (_req, res) => {
   res.json(issueChallenge());
 });
@@ -150,7 +173,12 @@ if (process.env.NODE_ENV === 'production') {
   const dist = path.join(ROOT, 'dist');
   app.use(express.static(dist));
   app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/auth') || req.path === '/me') {
+    if (
+      req.path.startsWith('/api') ||
+      req.path.startsWith('/auth') ||
+      req.path.startsWith('/uploads') ||
+      req.path === '/me'
+    ) {
       return next();
     }
     res.sendFile(path.join(dist, 'index.html'));

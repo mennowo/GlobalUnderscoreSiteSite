@@ -22,6 +22,13 @@ export default function App() {
     fetchMe().then(setMe).catch(() => setMe({ user: null, oidcConfigured: false }));
   }, []);
 
+  useEffect(() => {
+    const url = content?.hero?.logoUrl;
+    if (!url) return;
+    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (link) link.href = url;
+  }, [content?.hero?.logoUrl]);
+
   const isAdmin = !!me.user?.isAdmin;
   const canEdit = isAdmin && editing;
 
@@ -86,6 +93,8 @@ export default function App() {
     <>
       <AdminBar
         me={me}
+        header={view.header}
+        edit={editContext}
         editing={editing}
         saveState={saveState}
         onStartEdit={startEdit}
@@ -100,7 +109,7 @@ export default function App() {
         <Gallery gallery={view.gallery} edit={editContext} />
         <Details event={view.event} edit={editContext} />
         <SignupForm closing={view.closing} edit={editContext} />
-        <Footer />
+        <Footer footer={view.footer} edit={editContext} />
       </main>
     </>
   );
