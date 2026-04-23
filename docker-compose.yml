@@ -3,17 +3,17 @@ services:
     build: .
     image: global-underscore-site:latest
     restart: unless-stopped
-    ports:
-      - "3010:3010"
+    expose:
+      - "3010"
     environment:
-      NODE_ENV: production
-      PORT: 3010
-      BASE_URL: ${BASE_URL}
-      SESSION_SECRET: ${SESSION_SECRET}
-      OIDC_ISSUER: ${OIDC_ISSUER}
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
-      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
-      ADMIN_EMAILS: ${ADMIN_EMAILS}
+      - NODE_ENV=production
+      - PORT=3010
+      - BASE_URL=${BASE_URL}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - OIDC_ISSUER=${OIDC_ISSUER}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - ADMIN_EMAILS=${ADMIN_EMAILS}
     volumes:
       - gu-data:/app/data
 
