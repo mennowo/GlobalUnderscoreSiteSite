@@ -42,7 +42,7 @@ export default function ImageUpload({
   }
 
   return (
-    <div className={`${canEdit ? 'relative' : ''} ${className}`}>
+    <div className={`${className}`}>
       <img src={url} alt={alt} className={imgClassName} loading="lazy" />
       {canEdit && (
         <div className="absolute inset-0 bg-ink/40 opacity-0 hover:opacity-100 focus-within:opacity-100 transition flex flex-col items-center justify-center gap-2 text-white text-sm p-3 rounded-[inherit]">
