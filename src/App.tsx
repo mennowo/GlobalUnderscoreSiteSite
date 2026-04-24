@@ -63,7 +63,7 @@ export default function App() {
   const view = canEdit && draft ? draft : content;
 
   const setField = useCallback(
-    (path: string[], value: string) => {
+    (path: string[], value: unknown) => {
       setDraft((prev) => {
         if (!prev) return prev;
         const next = JSON.parse(JSON.stringify(prev));
@@ -78,9 +78,18 @@ export default function App() {
     [],
   );
 
+  const updateDraft = useCallback((mutate: (draft: Content) => void) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const next = JSON.parse(JSON.stringify(prev)) as Content;
+      mutate(next);
+      return next;
+    });
+  }, []);
+
   const editContext = useMemo(
-    () => ({ canEdit, setField }),
-    [canEdit, setField],
+    () => ({ canEdit, setField, updateDraft }),
+    [canEdit, setField, updateDraft],
   );
 
   if (!view) {

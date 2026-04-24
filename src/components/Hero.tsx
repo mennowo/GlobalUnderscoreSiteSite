@@ -1,8 +1,6 @@
-import { Content } from '../lib/api';
+import { Content, EditCtx } from '../lib/api';
 import EditableText from './EditableText';
 import ImageUpload from './ImageUpload';
-
-type EditCtx = { canEdit: boolean; setField: (path: string[], value: string) => void };
 
 export default function Hero({ content, edit }: { content: Content['hero']; edit: EditCtx }) {
   return (

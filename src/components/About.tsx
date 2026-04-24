@@ -1,7 +1,5 @@
-import { Content } from '../lib/api';
+import { Content, EditCtx } from '../lib/api';
 import EditableText from './EditableText';
-
-type EditCtx = { canEdit: boolean; setField: (path: string[], value: string) => void };
 
 export default function About({
   about,

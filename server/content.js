@@ -88,17 +88,28 @@ export const defaultContent = {
       "Wear what lets you move. Bring water, a layer, maybe the book you're reading. Arrive a little early. Roll around. Leave slightly rearranged.",
   },
   signup: {
-    nameLabel: 'your name',
-    emailLabel: 'email',
-    phoneLabel: 'phone',
-    phoneOptional: '(optional)',
-    didBeforeLabel: "I've danced an Underscore before",
-    didBeforeNote:
-      "If not, don't worry — the talk at 15:00 is for you, and we're glad you're coming.",
-    hasCiLabel: 'I have experience with Contact Improvisation',
-    noTalkLabel: 'I cannot attend the Underscore talk before the jam',
-    noTalkNote:
-      "Heard it all before? We warmly invite you to join us nonetheless: let's share our entry into the material.",
+    fields: [
+      { id: 'name', kind: 'text', label: 'your name', required: true },
+      { id: 'email', kind: 'email', label: 'email', required: true },
+      { id: 'phone', kind: 'phone', label: 'phone (optional)' },
+      {
+        id: 'didBefore',
+        kind: 'checkbox',
+        label: "I've danced an Underscore before",
+        note: "If not, don't worry — the talk at 15:00 is for you, and we're glad you're coming.",
+      },
+      {
+        id: 'hasCi',
+        kind: 'checkbox',
+        label: 'I have experience with Contact Improvisation',
+      },
+      {
+        id: 'noTalk',
+        kind: 'checkbox',
+        label: 'I cannot attend the Underscore talk before the jam',
+        note: "Heard it all before? We warmly invite you to join us nonetheless: let's share our entry into the material.",
+      },
+    ],
     submitLabel: 'count me in →',
     submittingLabel: 'sending…',
     successHeading: "You're in. 🌞",

@@ -126,21 +126,27 @@ app.get('/api/challenge', (_req, res) => {
   res.json(issueChallenge());
 });
 
-app.post('/api/signup', (req, res) => {
+app.post('/api/signup', async (req, res) => {
   try {
     const body = req.body || {};
     const check = verifyChallenge(body.token, body.hp);
     if (!check.ok) return res.status(400).json({ error: `rejected: ${check.reason}` });
-    const row = insertSignup(body);
+    const content = await readContent();
+    const row = insertSignup(body, content.signup?.fields || []);
     res.json({ ok: true, row });
   } catch (err) {
     res.status(400).json({ error: String(err.message || err) });
   }
 });
 
-app.get('/api/signups', requireAdmin, (_req, res) => {
+app.get('/api/signups', requireAdmin, async (_req, res) => {
   try {
-    res.json({ count: countSignups(), rows: listSignups() });
+    const content = await readContent();
+    res.json({
+      count: countSignups(),
+      fields: content.signup?.fields || [],
+      rows: listSignups(),
+    });
   } catch (err) {
     res.status(500).json({ error: String(err.message || err) });
   }
@@ -158,9 +164,10 @@ app.delete('/api/signups/:id', requireAdmin, (req, res) => {
   }
 });
 
-app.get('/api/signups.csv', requireAdmin, (_req, res) => {
+app.get('/api/signups.csv', requireAdmin, async (_req, res) => {
   try {
-    const csv = signupsAsCsv();
+    const content = await readContent();
+    const csv = signupsAsCsv(content.signup?.fields || []);
     res.setHeader('content-type', 'text/csv; charset=utf-8');
     res.setHeader('content-disposition', 'attachment; filename="signups.csv"');
     res.send(csv);

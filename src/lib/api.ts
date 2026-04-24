@@ -56,15 +56,7 @@ export type Content = {
   };
   closing: { eyebrow: string; heading: string; body: string };
   signup: {
-    nameLabel: string;
-    emailLabel: string;
-    phoneLabel: string;
-    phoneOptional: string;
-    didBeforeLabel: string;
-    didBeforeNote: string;
-    hasCiLabel: string;
-    noTalkLabel: string;
-    noTalkNote: string;
+    fields: SignupField[];
     submitLabel: string;
     submittingLabel: string;
     successHeading: string;
@@ -72,6 +64,31 @@ export type Content = {
     successButton: string;
     footnote: string;
   };
+};
+
+export type EditCtx = {
+  canEdit: boolean;
+  setField: (path: string[], value: unknown) => void;
+  updateDraft: (mutate: (draft: Content) => void) => void;
+};
+
+export type SignupFieldKind =
+  | 'text'
+  | 'multiline'
+  | 'email'
+  | 'phone'
+  | 'checkbox'
+  | 'radio';
+
+export type SignupRadioOption = { id: string; label: string };
+
+export type SignupField = {
+  id: string;
+  kind: SignupFieldKind;
+  label: string;
+  note?: string;
+  required?: boolean;
+  options?: SignupRadioOption[];
 };
 
 export type Me = {
@@ -82,12 +99,7 @@ export type Me = {
 export type Signup = {
   id: number;
   ts: string;
-  name: string;
-  email: string;
-  phone: string;
-  didUnderscoreBefore: boolean;
-  hasCiExperience: boolean;
-  cannotAttendTalk: boolean;
+  data: Record<string, string | boolean>;
 };
 
 export async function fetchMe(): Promise<Me> {
@@ -127,12 +139,7 @@ export async function uploadImage(file: File): Promise<{ url: string }> {
 }
 
 export async function submitSignup(payload: {
-  name: string;
-  email: string;
-  phone: string;
-  didUnderscoreBefore: boolean;
-  hasCiExperience: boolean;
-  cannotAttendTalk: boolean;
+  data: Record<string, string | boolean>;
   hp: string;
   token: string;
 }): Promise<void> {
@@ -153,7 +160,11 @@ export async function fetchChallenge(): Promise<{ token: string }> {
   return r.json();
 }
 
-export async function fetchSignups(): Promise<{ count: number; rows: Signup[] }> {
+export async function fetchSignups(): Promise<{
+  count: number;
+  fields: SignupField[];
+  rows: Signup[];
+}> {
   const r = await fetch('/api/signups', { credentials: 'same-origin' });
   if (!r.ok) throw new Error('failed to load signups');
   return r.json();

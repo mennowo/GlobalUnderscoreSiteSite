@@ -1,8 +1,40 @@
 import { useEffect, useState } from 'react';
-import { Signup, deleteSignup, fetchSignups } from '../lib/api';
+import { Signup, SignupField, deleteSignup, fetchSignups } from '../lib/api';
+
+function formatCell(field: SignupField, v: string | boolean | undefined) {
+  if (field.kind === 'checkbox') {
+    return v ? (
+      <span className="chip !bg-sage/20 text-xs">yes</span>
+    ) : (
+      <span className="text-ink/30">—</span>
+    );
+  }
+  const s = typeof v === 'string' ? v : v == null ? '' : String(v);
+  if (!s) return <span className="text-ink/30">—</span>;
+  if (field.kind === 'email') {
+    return (
+      <a href={`mailto:${s}`} className="link">
+        {s}
+      </a>
+    );
+  }
+  if (field.kind === 'phone') {
+    return (
+      <a href={`tel:${s}`} className="link">
+        {s}
+      </a>
+    );
+  }
+  if (field.kind === 'radio') {
+    const label = field.options?.find((o) => o.id === s)?.label || s;
+    return <span>{label}</span>;
+  }
+  return <span className="whitespace-pre-wrap">{s}</span>;
+}
 
 export default function SignupsPanel({ onClose }: { onClose: () => void }) {
   const [rows, setRows] = useState<Signup[] | null>(null);
+  const [fields, setFields] = useState<SignupField[]>([]);
   const [count, setCount] = useState(0);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -12,6 +44,7 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
     try {
       const data = await fetchSignups();
       setRows(data.rows);
+      setFields(data.fields);
       setCount(data.count);
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'failed');
@@ -38,21 +71,19 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
     }
   }
 
+  const checkboxFields = fields.filter((f) => f.kind === 'checkbox');
+
   return (
     <div className="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-sm flex items-start md:items-center justify-center p-4">
       <div className="w-full max-w-5xl max-h-[90vh] bg-cream rounded-3xl shadow-soft border border-white/60 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-ink/10">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-ink/10 flex-wrap">
           <h2 className="font-display text-2xl">Signups</h2>
           <span className="chip text-xs">{count} total</span>
-          <span className="chip text-xs">
-            {rows?.filter((r) => r.didUnderscoreBefore).length ?? 0} underscored before
-          </span>
-          <span className="chip text-xs">
-            {rows?.filter((r) => r.hasCiExperience).length ?? 0} CI experience
-          </span>
-          <span className="chip text-xs">
-            {rows?.filter((r) => r.cannotAttendTalk).length ?? 0} skipping talk
-          </span>
+          {checkboxFields.map((f) => (
+            <span key={f.id} className="chip text-xs">
+              {rows?.filter((r) => !!r.data?.[f.id]).length ?? 0} {f.label.toLowerCase()}
+            </span>
+          ))}
           <div className="flex-1" />
           <a href="/api/signups.csv" className="btn-ghost !px-4 !py-1.5 text-sm">
             ↓ CSV
@@ -78,12 +109,11 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
               <thead className="sticky top-0 bg-sand/90 backdrop-blur">
                 <tr className="text-left text-ink/60 text-xs uppercase tracking-widest">
                   <th className="px-4 py-3 font-medium">when</th>
-                  <th className="px-4 py-3 font-medium">name</th>
-                  <th className="px-4 py-3 font-medium">email</th>
-                  <th className="px-4 py-3 font-medium">phone</th>
-                  <th className="px-4 py-3 font-medium">underscore</th>
-                  <th className="px-4 py-3 font-medium">CI</th>
-                  <th className="px-4 py-3 font-medium">talk?</th>
+                  {fields.map((f) => (
+                    <th key={f.id} className="px-4 py-3 font-medium">
+                      {f.label}
+                    </th>
+                  ))}
                   <th className="px-4 py-3 font-medium w-px"></th>
                 </tr>
               </thead>
@@ -93,42 +123,11 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
                     <td className="px-4 py-3 text-ink/60 whitespace-nowrap">
                       {new Date(r.ts).toLocaleString()}
                     </td>
-                    <td className="px-4 py-3">{r.name}</td>
-                    <td className="px-4 py-3">
-                      <a href={`mailto:${r.email}`} className="link">
-                        {r.email}
-                      </a>
-                    </td>
-                    <td className="px-4 py-3 text-ink/70 whitespace-nowrap">
-                      {r.phone ? (
-                        <a href={`tel:${r.phone}`} className="link">
-                          {r.phone}
-                        </a>
-                      ) : (
-                        <span className="text-ink/30">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {r.didUnderscoreBefore ? (
-                        <span className="chip !bg-sage/20 text-xs">yes</span>
-                      ) : (
-                        <span className="chip !bg-mustard/20 text-xs">first</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {r.hasCiExperience ? (
-                        <span className="chip !bg-sage/20 text-xs">yes</span>
-                      ) : (
-                        <span className="text-ink/30">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {r.cannotAttendTalk ? (
-                        <span className="chip !bg-coral/20 text-xs">skip</span>
-                      ) : (
-                        <span className="chip !bg-sage/20 text-xs">will attend</span>
-                      )}
-                    </td>
+                    {fields.map((f) => (
+                      <td key={f.id} className="px-4 py-3 align-top">
+                        {formatCell(f, r.data?.[f.id])}
+                      </td>
+                    ))}
                     <td className="px-4 py-3">
                       <button
                         onClick={() => onDelete(r.id)}

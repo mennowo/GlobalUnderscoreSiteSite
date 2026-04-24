@@ -16,9 +16,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS signups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ts TEXT NOT NULL,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    did_underscore_before INTEGER NOT NULL DEFAULT 0
+    data TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_signups_ts ON signups(ts);
 
@@ -29,11 +27,18 @@ db.exec(`
   );
 `);
 
-// idempotent column additions — runs on every boot, no-ops if already present
+// one-time destructive migration from the fixed-column schema to JSON-blob rows.
+// Backwards compatibility is explicitly out of scope; any old rows are discarded.
 const signupCols = new Set(db.prepare('PRAGMA table_info(signups)').all().map((c) => c.name));
-const addCol = (name, sql) => {
-  if (!signupCols.has(name)) db.exec(`ALTER TABLE signups ADD COLUMN ${sql}`);
-};
-addCol('phone', "phone TEXT NOT NULL DEFAULT ''");
-addCol('has_ci_experience', 'has_ci_experience INTEGER NOT NULL DEFAULT 0');
-addCol('cannot_attend_talk', 'cannot_attend_talk INTEGER NOT NULL DEFAULT 0');
+if (!signupCols.has('data')) {
+  db.exec('DROP TABLE IF EXISTS signups');
+  db.exec(`
+    CREATE TABLE signups (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ts TEXT NOT NULL,
+      data TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_signups_ts ON signups(ts);
+  `);
+  console.log('[db] migrated signups table to dynamic-fields schema (old rows dropped)');
+}
