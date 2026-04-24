@@ -37,7 +37,7 @@ if (oidcConfigured) {
   app.use(
     auth({
       authRequired: false,
-      auth0Logout: false,
+      auth0Logout: true,
       idpLogout: true,
       baseURL: BASE_URL,
       clientID: process.env.OIDC_CLIENT_ID,
