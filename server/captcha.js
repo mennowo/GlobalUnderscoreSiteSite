@@ -15,7 +15,12 @@ const MIN_MS = 2_000;          // humans take > 2s to fill the form
 const MAX_MS = 2 * 60 * 60_000; // tokens valid for 2h
 
 function secret() {
-  return process.env.SESSION_SECRET || 'dev-insecure-secret';
+  const s = process.env.SESSION_SECRET;
+  // Fail-closed: if SESSION_SECRET is missing, refuse to sign/verify tokens.
+  // index.js enforces this at startup, so this should never fire at runtime;
+  // kept as defense-in-depth against a misconfigured import path.
+  if (!s) throw new Error('SESSION_SECRET is required for captcha signing');
+  return s;
 }
 
 function b64url(buf) {

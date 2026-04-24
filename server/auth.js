@@ -11,9 +11,11 @@ const SCRYPT_R = 8;
 const SCRYPT_P = 1;
 const SCRYPT_KEYLEN = 64;
 
+export const MIN_PASSWORD_LEN = 12;
+
 export async function hashPassword(plain) {
-  if (typeof plain !== 'string' || plain.length < 8) {
-    throw new Error('password must be at least 8 characters');
+  if (typeof plain !== 'string' || plain.length < MIN_PASSWORD_LEN) {
+    throw new Error(`password must be at least ${MIN_PASSWORD_LEN} characters`);
   }
   const salt = randomBytes(16);
   const derived = await scryptAsync(plain, salt, SCRYPT_KEYLEN, {

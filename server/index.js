@@ -1,6 +1,8 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import pkg from 'express-openid-connect';
 const { auth } = pkg;
 import { readContent, writeContent } from './content.js';
@@ -28,18 +30,62 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);
 
+// Fail-closed: SESSION_SECRET is required for cookie signing AND captcha HMAC.
+// Without it we'd silently downgrade to an insecure dev fallback or no auth at all.
+if (!process.env.SESSION_SECRET) {
+  console.error(
+    '[fatal] SESSION_SECRET is required. Generate one with `openssl rand -hex 32` and set it in .env.',
+  );
+  process.exit(1);
+}
+
 const oidcConfigured =
   !!process.env.OIDC_ISSUER &&
   !!process.env.OIDC_CLIENT_ID &&
-  !!process.env.OIDC_CLIENT_SECRET &&
-  !!process.env.SESSION_SECRET;
+  !!process.env.OIDC_CLIENT_SECRET;
 
-const localAuthEnabled =
-  process.env.LOCAL_AUTH_DISABLED !== '1' && !!process.env.SESSION_SECRET;
+const localAuthEnabled = process.env.LOCAL_AUTH_DISABLED !== '1';
 
 const app = express();
 app.set('trust proxy', 1);
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        'default-src': ["'self'"],
+        // admins can paste external image URLs into gallery content, so keep img permissive
+        'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+        'style-src': ["'self'", "'unsafe-inline'"],
+        'font-src': ["'self'", 'data:'],
+        'script-src': ["'self'"],
+        'connect-src': ["'self'"],
+        'frame-ancestors': ["'none'"],
+        'object-src': ["'none'"],
+        'base-uri': ["'self'"],
+        'form-action': ["'self'"],
+        'upgrade-insecure-requests': [],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'same-site' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  }),
+);
+
 app.use(express.json({ limit: '200kb' }));
+
+// Signup rate limit: tolerant for a group signing up friends, strict for bots.
+// 10 submissions / 15 min / IP lets a couple sign up a whole group in one session
+// while capping storage-DoS via one captcha token (valid for 2h).
+const signupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'too many signups from this address, try again later' },
+});
 
 if (localAuthEnabled) {
   app.use(buildSessionMiddleware(process.env.SESSION_SECRET));
@@ -63,9 +109,7 @@ if (oidcConfigured) {
 }
 
 if (!oidcConfigured && !localAuthEnabled) {
-  console.warn(
-    '[auth] no auth configured — admin endpoints will be disabled. Set SESSION_SECRET to enable local auth, or configure OIDC env vars.',
-  );
+  console.warn('[auth] both local auth and OIDC are disabled — admin endpoints will be unreachable.');
 }
 
 function currentUser(req) {
@@ -142,7 +186,18 @@ app.put('/api/content', csrfGuard, requireAdmin, async (req, res) => {
   }
 });
 
-app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '1h', fallthrough: false }));
+// Static uploads get a locked-down CSP + nosniff so a malicious SVG cannot
+// run script, fetch network resources, or be embedded cross-origin.
+app.use(
+  '/uploads',
+  (_req, res, next) => {
+    res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+    next();
+  },
+  express.static(UPLOADS_DIR, { maxAge: '1h', fallthrough: false }),
+);
 
 app.post(
   '/api/uploads',
@@ -169,7 +224,7 @@ app.get('/api/challenge', (_req, res) => {
   res.json(issueChallenge());
 });
 
-app.post('/api/signup', csrfGuard, async (req, res) => {
+app.post('/api/signup', signupLimiter, csrfGuard, async (req, res) => {
   try {
     const body = req.body || {};
     const check = verifyChallenge(body.token, body.hp);

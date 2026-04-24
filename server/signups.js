@@ -58,7 +58,10 @@ export function deleteSignup(id) {
 }
 
 function csvEscape(v) {
-  const s = typeof v === 'boolean' ? (v ? 'yes' : 'no') : String(v ?? '');
+  let s = typeof v === 'boolean' ? (v ? 'yes' : 'no') : String(v ?? '');
+  // CSV injection: Excel/Sheets interpret leading =, +, -, @, tab, CR as a formula.
+  // Prefix with a single quote so the cell renders as text.
+  if (s && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }

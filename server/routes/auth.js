@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { findUserByEmail, findUserById, updateUserPassword } from '../users.js';
-import { verifyPassword, rotateSession } from '../auth.js';
+import { verifyPassword, rotateSession, MIN_PASSWORD_LEN } from '../auth.js';
 
 export function buildAuthRoutes() {
   const router = Router();
@@ -49,8 +49,8 @@ export function buildAuthRoutes() {
       if (!currentPassword || !newPassword) {
         return res.status(400).json({ error: 'currentPassword and newPassword required' });
       }
-      if (typeof newPassword !== 'string' || newPassword.length < 8) {
-        return res.status(400).json({ error: 'new password must be at least 8 characters' });
+      if (typeof newPassword !== 'string' || newPassword.length < MIN_PASSWORD_LEN) {
+        return res.status(400).json({ error: `new password must be at least ${MIN_PASSWORD_LEN} characters` });
       }
       const user = findUserById(userId);
       if (!user) return res.status(401).json({ error: 'not authenticated' });
