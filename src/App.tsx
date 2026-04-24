@@ -114,7 +114,7 @@ export default function App() {
       {showSignups && <SignupsPanel onClose={() => setShowSignups(false)} />}
       <main className="relative">
         <Hero content={view.hero} edit={editContext} />
-        <About about={view.about} what={view.what} edit={editContext} />
+        <About about={view.about} edit={editContext} />
         <Gallery gallery={view.gallery} edit={editContext} />
         <Details event={view.event} edit={editContext} />
         <SignupForm closing={view.closing} signup={view.signup} edit={editContext} />

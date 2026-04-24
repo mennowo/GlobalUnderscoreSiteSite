@@ -25,19 +25,27 @@ export const defaultContent = {
     logoUrl: '/logo.svg',
   },
   about: {
-    eyebrow: 'the score',
-    heading: 'What is the Underscore?',
-    body:
-      "The Underscore is a dance score developed by Nancy Stark Smith in the early 1990s as a framework for improvisation rooted in Contact Improvisation. It moves through phases — arriving, preamble, small dance, solo, ensemble, harvest — that invite us to listen, to fall, to roll, to meet weight, and to let a shared dance grow out of simply showing up.\n\nOn or around the summer solstice, communities across the planet dance the Underscore at the same time. Different time zones, different rooms, one overlapping field of attention. That's the Global Underscore — and on 20 June 2026, Vienna joins in.",
-    worldwideText: 'More on the worldwide event at',
-    worldwideLinkLabel: 'globalunderscore.com',
-    worldwideUrl: 'https://globalunderscore.com/',
-  },
-  what: {
-    eyebrow: 'the form',
-    heading: 'What is Contact Improvisation?',
-    body:
-      'Contact Improvisation is a movement form where two or more people share weight, momentum and touch, following the point of contact wherever it wants to go. No steps to learn. No right way to do it. Bring curious skin, soft joints, and a willingness to be surprised.',
+    blocks: [
+      {
+        id: 'score',
+        accent: 'coral',
+        eyebrow: 'the score',
+        heading: 'What is the Underscore?',
+        body: "The Underscore is a dance score developed by Nancy Stark Smith in the early 1990s as a framework for improvisation rooted in Contact Improvisation. It moves through phases — arriving, preamble, small dance, solo, ensemble, harvest — that invite us to listen, to fall, to roll, to meet weight, and to let a shared dance grow out of simply showing up.\n\nOn or around the summer solstice, communities across the planet dance the Underscore at the same time. Different time zones, different rooms, one overlapping field of attention. That's the Global Underscore — and on 20 June 2026, Vienna joins in.",
+        link: {
+          text: 'More on the worldwide event at',
+          label: 'globalunderscore.com',
+          url: 'https://globalunderscore.com/',
+        },
+      },
+      {
+        id: 'form',
+        accent: 'sage',
+        eyebrow: 'the form',
+        heading: 'What is Contact Improvisation?',
+        body: 'Contact Improvisation is a movement form where two or more people share weight, momentum and touch, following the point of contact wherever it wants to go. No steps to learn. No right way to do it. Bring curious skin, soft joints, and a willingness to be surprised.',
+      },
+    ],
   },
   gallery: {
     heading: 'The space, the shapes.',
@@ -59,27 +67,31 @@ export const defaultContent = {
     heroLine2: 'Four hours of dance.',
     heroBody:
       'Summer solstice in Vienna. Arrive open, leave a little lighter. Coffee and water on site.',
-    date: 'Saturday, 20 June 2026',
-    talkTime: '15:00 – 16:00',
-    danceTime: '16:00 – 20:00',
-    danceNote: '',
-    venue: 'Samdrubling',
-    address: 'Beispielgasse 12, 1070 Vienna, Austria',
-    price: '€25',
-    priceNote: '',
-    liveMusic: 'Yes — live music throughout the score',
-    liveMusicNote: '',
-    talkNote:
-      "The Underscore Talk (15:00–16:00) is required if this is your first Underscore, and warmly welcomed for everyone else — it's a lovely way to settle in together.",
-    labelDate: 'date',
-    labelTalk: 'talk',
-    labelDance: 'dance',
-    labelVenue: 'venue',
-    labelPrice: 'price',
-    labelLiveMusic: 'live music',
     tag1: '🎶 live music',
     tag2: '🌞 solstice',
     tag3: '🌍 worldwide practice',
+    rows: [
+      { id: 'date', label: 'date', value: 'Saturday, 20 June 2026' },
+      {
+        id: 'talk',
+        label: 'talk',
+        value: '15:00 – 16:00',
+        note: "The Underscore Talk (15:00–16:00) is required if this is your first Underscore, and warmly welcomed for everyone else — it's a lovely way to settle in together.",
+      },
+      { id: 'dance', label: 'dance', value: '16:00 – 20:00' },
+      {
+        id: 'venue',
+        label: 'venue',
+        value: 'Samdrubling',
+        note: 'Beispielgasse 12, 1070 Vienna, Austria',
+      },
+      { id: 'price', label: 'price', value: '€25' },
+      {
+        id: 'liveMusic',
+        label: 'live music',
+        value: 'Yes — live music throughout the score',
+      },
+    ],
   },
   closing: {
     eyebrow: 'join us',

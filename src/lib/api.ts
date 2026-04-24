@@ -11,15 +11,7 @@ export type Content = {
     aboutCta: string;
     logoUrl: string;
   };
-  about: {
-    eyebrow: string;
-    heading: string;
-    body: string;
-    worldwideText: string;
-    worldwideLinkLabel: string;
-    worldwideUrl: string;
-  };
-  what: { eyebrow: string; heading: string; body: string };
+  about: { blocks: AboutBlock[] };
   gallery: {
     heading: string;
     subtitle: string;
@@ -33,26 +25,10 @@ export type Content = {
     heroLine1: string;
     heroLine2: string;
     heroBody: string;
-    date: string;
-    talkTime: string;
-    danceTime: string;
-    danceNote: string;
-    venue: string;
-    address: string;
-    price: string;
-    priceNote: string;
-    liveMusic: string;
-    liveMusicNote: string;
-    talkNote: string;
-    labelDate: string;
-    labelTalk: string;
-    labelDance: string;
-    labelVenue: string;
-    labelPrice: string;
-    labelLiveMusic: string;
     tag1: string;
     tag2: string;
     tag3: string;
+    rows: EventRow[];
   };
   closing: { eyebrow: string; heading: string; body: string };
   signup: {
@@ -64,6 +40,24 @@ export type Content = {
     successButton: string;
     footnote: string;
   };
+};
+
+export type BlockAccent = 'coral' | 'sage' | 'mustard' | 'terracotta';
+
+export type AboutBlock = {
+  id: string;
+  accent: BlockAccent;
+  eyebrow: string;
+  heading: string;
+  body: string;
+  link?: { text: string; label: string; url: string };
+};
+
+export type EventRow = {
+  id: string;
+  label: string;
+  value: string;
+  note?: string;
 };
 
 export type EditCtx = {
