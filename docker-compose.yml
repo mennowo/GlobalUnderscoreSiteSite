@@ -8,7 +8,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3010
-      - BASE_URL=${COOLIFY_URL}
+      - BASE_URL=${BASE_URL}
       - SESSION_SECRET=${SESSION_SECRET}
       - OIDC_ISSUER=${OIDC_ISSUER}
       - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
