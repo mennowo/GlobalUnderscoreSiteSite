@@ -16,7 +16,13 @@ export default function About({
     <section id="about" className="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
       <div className="grid md:grid-cols-2 gap-10 md:gap-16">
         <div className="card p-8 md:p-10">
-          <div className="text-xs uppercase tracking-widest text-coral mb-3">the score</div>
+          <EditableText
+            as="div"
+            canEdit={edit.canEdit}
+            value={about.eyebrow}
+            onChange={(v) => edit.setField(['about', 'eyebrow'], v)}
+            className="text-xs uppercase tracking-widest text-coral mb-3"
+          />
           <h2 className="text-3xl md:text-4xl font-display font-semibold">
             <EditableText
               canEdit={edit.canEdit}
@@ -33,16 +39,40 @@ export default function About({
             multiline
           />
           <p className="mt-6 text-sm text-ink/50">
-            More on the worldwide event at{' '}
-            <a className="link" href="https://globalunderscore.com/" target="_blank" rel="noreferrer">
-              globalunderscore.com
+            <EditableText
+              canEdit={edit.canEdit}
+              value={about.worldwideText}
+              onChange={(v) => edit.setField(['about', 'worldwideText'], v)}
+            />{' '}
+            <a className="link" href={about.worldwideUrl} target="_blank" rel="noreferrer">
+              <EditableText
+                canEdit={edit.canEdit}
+                value={about.worldwideLinkLabel}
+                onChange={(v) => edit.setField(['about', 'worldwideLinkLabel'], v)}
+              />
             </a>
             .
+            {edit.canEdit && (
+              <span className="block mt-2 text-xs text-ink/40">
+                link url:{' '}
+                <EditableText
+                  canEdit={edit.canEdit}
+                  value={about.worldwideUrl}
+                  onChange={(v) => edit.setField(['about', 'worldwideUrl'], v)}
+                />
+              </span>
+            )}
           </p>
         </div>
 
         <div className="card p-8 md:p-10 md:mt-20 md:rotate-[0.4deg]">
-          <div className="text-xs uppercase tracking-widest text-sage mb-3">the form</div>
+          <EditableText
+            as="div"
+            canEdit={edit.canEdit}
+            value={what.eyebrow}
+            onChange={(v) => edit.setField(['what', 'eyebrow'], v)}
+            className="text-xs uppercase tracking-widest text-sage mb-3"
+          />
           <h2 className="text-3xl md:text-4xl font-display font-semibold">
             <EditableText
               canEdit={edit.canEdit}

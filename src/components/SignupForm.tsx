@@ -6,9 +6,11 @@ type EditCtx = { canEdit: boolean; setField: (path: string[], value: string) => 
 
 export default function SignupForm({
   closing,
+  signup,
   edit,
 }: {
   closing: Content['closing'];
+  signup: Content['signup'];
   edit: EditCtx;
 }) {
   const [name, setName] = useState('');
@@ -60,7 +62,13 @@ export default function SignupForm({
     <section id="signup" className="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
       <div className="grid md:grid-cols-5 gap-10 md:gap-16 items-start">
         <div className="md:col-span-2">
-          <div className="text-xs uppercase tracking-widest text-sage mb-2">join us</div>
+          <EditableText
+            as="div"
+            canEdit={edit.canEdit}
+            value={closing.eyebrow}
+            onChange={(v) => edit.setField(['closing', 'eyebrow'], v)}
+            className="text-xs uppercase tracking-widest text-sage mb-2"
+          />
           <h2 className="text-4xl md:text-5xl font-display font-semibold">
             <EditableText
               canEdit={edit.canEdit}
@@ -84,16 +92,31 @@ export default function SignupForm({
         >
           {state === 'done' ? (
             <div className="py-6">
-              <h3 className="text-2xl font-display">You're in. 🌞</h3>
-              <p className="mt-3 text-ink/70">
-                We've noted your name down. See you on 20 June — come as you are.
-              </p>
+              <h3 className="text-2xl font-display">
+                <EditableText
+                  canEdit={edit.canEdit}
+                  value={signup.successHeading}
+                  onChange={(v) => edit.setField(['signup', 'successHeading'], v)}
+                />
+              </h3>
+              <EditableText
+                as="p"
+                canEdit={edit.canEdit}
+                value={signup.successBody}
+                onChange={(v) => edit.setField(['signup', 'successBody'], v)}
+                className="mt-3 text-ink/70"
+                multiline
+              />
               <button
                 type="button"
                 className="btn-ghost mt-6"
                 onClick={() => setState('idle')}
               >
-                sign someone else up
+                <EditableText
+                  canEdit={edit.canEdit}
+                  value={signup.successButton}
+                  onChange={(v) => edit.setField(['signup', 'successButton'], v)}
+                />
               </button>
             </div>
           ) : (
@@ -122,7 +145,13 @@ export default function SignupForm({
               </div>
 
               <label className="block">
-                <span className="text-sm text-ink/70">your name</span>
+                <EditableText
+                  as="span"
+                  canEdit={edit.canEdit}
+                  value={signup.nameLabel}
+                  onChange={(v) => edit.setField(['signup', 'nameLabel'], v)}
+                  className="text-sm text-ink/70"
+                />
                 <input
                   type="text"
                   required
@@ -132,7 +161,13 @@ export default function SignupForm({
                 />
               </label>
               <label className="block mt-5">
-                <span className="text-sm text-ink/70">email</span>
+                <EditableText
+                  as="span"
+                  canEdit={edit.canEdit}
+                  value={signup.emailLabel}
+                  onChange={(v) => edit.setField(['signup', 'emailLabel'], v)}
+                  className="text-sm text-ink/70"
+                />
                 <input
                   type="email"
                   required
@@ -143,7 +178,17 @@ export default function SignupForm({
               </label>
               <label className="block mt-5">
                 <span className="text-sm text-ink/70">
-                  phone <span className="text-ink/40">(optional)</span>
+                  <EditableText
+                    canEdit={edit.canEdit}
+                    value={signup.phoneLabel}
+                    onChange={(v) => edit.setField(['signup', 'phoneLabel'], v)}
+                  />{' '}
+                  <EditableText
+                    canEdit={edit.canEdit}
+                    value={signup.phoneOptional}
+                    onChange={(v) => edit.setField(['signup', 'phoneOptional'], v)}
+                    className="text-ink/40"
+                  />
                 </span>
                 <input
                   type="tel"
@@ -163,10 +208,19 @@ export default function SignupForm({
                     className="mt-1 w-5 h-5 accent-coral"
                   />
                   <span className="text-ink/80">
-                    I've danced an Underscore before
-                    <span className="block text-sm text-ink/50 mt-0.5">
-                      If not, don't worry — the talk at 15:00 is for you, and we're glad you're coming.
-                    </span>
+                    <EditableText
+                      canEdit={edit.canEdit}
+                      value={signup.didBeforeLabel}
+                      onChange={(v) => edit.setField(['signup', 'didBeforeLabel'], v)}
+                    />
+                    <EditableText
+                      as="span"
+                      canEdit={edit.canEdit}
+                      value={signup.didBeforeNote}
+                      onChange={(v) => edit.setField(['signup', 'didBeforeNote'], v)}
+                      className="block text-sm text-ink/50 mt-0.5"
+                      multiline
+                    />
                   </span>
                 </label>
 
@@ -178,7 +232,11 @@ export default function SignupForm({
                     className="mt-1 w-5 h-5 accent-coral"
                   />
                   <span className="text-ink/80">
-                    I have experience with Contact Improvisation
+                    <EditableText
+                      canEdit={edit.canEdit}
+                      value={signup.hasCiLabel}
+                      onChange={(v) => edit.setField(['signup', 'hasCiLabel'], v)}
+                    />
                   </span>
                 </label>
 
@@ -190,11 +248,19 @@ export default function SignupForm({
                     className="mt-1 w-5 h-5 accent-coral"
                   />
                   <span className="text-ink/80">
-                    I <em>cannot</em> attend the Underscore talk before the jam
-                    <span className="block text-sm text-ink/50 mt-0.5">
-                      Heard it all before? We warmly invite you to join us nonetheless:
-                      let's share our entry into the material.
-                    </span>
+                    <EditableText
+                      canEdit={edit.canEdit}
+                      value={signup.noTalkLabel}
+                      onChange={(v) => edit.setField(['signup', 'noTalkLabel'], v)}
+                    />
+                    <EditableText
+                      as="span"
+                      canEdit={edit.canEdit}
+                      value={signup.noTalkNote}
+                      onChange={(v) => edit.setField(['signup', 'noTalkNote'], v)}
+                      className="block text-sm text-ink/50 mt-0.5"
+                      multiline
+                    />
                   </span>
                 </label>
               </div>
@@ -206,11 +272,25 @@ export default function SignupForm({
                 disabled={state === 'sending'}
                 className="btn-primary mt-6 w-full md:w-auto"
               >
-                {state === 'sending' ? 'sending…' : 'count me in →'}
+                <EditableText
+                  canEdit={edit.canEdit}
+                  value={state === 'sending' ? signup.submittingLabel : signup.submitLabel}
+                  onChange={(v) =>
+                    edit.setField(
+                      ['signup', state === 'sending' ? 'submittingLabel' : 'submitLabel'],
+                      v,
+                    )
+                  }
+                />
               </button>
-              <p className="mt-4 text-xs text-ink/40">
-                €25 at the door · cash or card · we'll send a friendly reminder a few days before.
-              </p>
+              <EditableText
+                as="p"
+                canEdit={edit.canEdit}
+                value={signup.footnote}
+                onChange={(v) => edit.setField(['signup', 'footnote'], v)}
+                className="mt-4 text-xs text-ink/40"
+                multiline
+              />
             </>
           )}
         </form>

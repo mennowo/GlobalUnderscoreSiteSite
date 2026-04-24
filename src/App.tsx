@@ -108,7 +108,7 @@ export default function App() {
         <About about={view.about} what={view.what} edit={editContext} />
         <Gallery gallery={view.gallery} edit={editContext} />
         <Details event={view.event} edit={editContext} />
-        <SignupForm closing={view.closing} edit={editContext} />
+        <SignupForm closing={view.closing} signup={view.signup} edit={editContext} />
         <Footer footer={view.footer} edit={editContext} />
       </main>
     </>

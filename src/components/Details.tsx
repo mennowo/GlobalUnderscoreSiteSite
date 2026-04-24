@@ -27,11 +27,31 @@ export default function Details({ event, edit }: { event: Content['event']; edit
     />
   );
 
+  const note = (k: keyof Content['event']) => {
+    if (!edit.canEdit && !event[k]) return null;
+    return (
+      <div className="mt-2 text-sm text-ink/60">
+        <EditableText
+          canEdit={edit.canEdit}
+          value={event[k]}
+          onChange={(v) => edit.setField(['event', k], v)}
+          multiline
+        />
+      </div>
+    );
+  };
+
   return (
     <section id="details" className="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
       <div className="grid md:grid-cols-5 gap-8 items-start">
         <div className="md:col-span-2">
-          <div className="text-xs uppercase tracking-widest text-coral mb-2">practicalities</div>
+          <EditableText
+            as="div"
+            canEdit={edit.canEdit}
+            value={event.eyebrow}
+            onChange={(v) => edit.setField(['event', 'eyebrow'], v)}
+            className="text-xs uppercase tracking-widest text-coral mb-2"
+          />
           <h2 className="text-4xl md:text-5xl font-display font-semibold leading-tight">
             <EditableText
               canEdit={edit.canEdit}
@@ -55,9 +75,27 @@ export default function Details({ event, edit }: { event: Content['event']; edit
             multiline
           />
           <div className="mt-6 flex flex-wrap gap-2">
-            <span className="chip">🎶 live music</span>
-            <span className="chip">🌞 solstice</span>
-            <span className="chip">🌍 worldwide practice</span>
+            <EditableText
+              as="span"
+              canEdit={edit.canEdit}
+              value={event.tag1}
+              onChange={(v) => edit.setField(['event', 'tag1'], v)}
+              className="chip"
+            />
+            <EditableText
+              as="span"
+              canEdit={edit.canEdit}
+              value={event.tag2}
+              onChange={(v) => edit.setField(['event', 'tag2'], v)}
+              className="chip"
+            />
+            <EditableText
+              as="span"
+              canEdit={edit.canEdit}
+              value={event.tag3}
+              onChange={(v) => edit.setField(['event', 'tag3'], v)}
+              className="chip"
+            />
           </div>
         </div>
 
@@ -75,13 +113,29 @@ export default function Details({ event, edit }: { event: Content['event']; edit
                 />
               </div>
             </Row>
-            <Row label={field('labelDance')}>{field('danceTime')}</Row>
+            <Row label={field('labelDance')}>
+              {field('danceTime')}
+              {note('danceNote')}
+            </Row>
             <Row label={field('labelVenue')}>
               {field('venue')}
-              <div className="mt-1 text-sm text-ink/60">{field('address')}</div>
+              <div className="mt-1 text-sm text-ink/60">
+                <EditableText
+                  canEdit={edit.canEdit}
+                  value={event.address}
+                  onChange={(v) => edit.setField(['event', 'address'], v)}
+                  multiline
+                />
+              </div>
             </Row>
-            <Row label={field('labelPrice')}>{field('price')}</Row>
-            <Row label={field('labelLiveMusic')}>{field('liveMusic')}</Row>
+            <Row label={field('labelPrice')}>
+              {field('price')}
+              {note('priceNote')}
+            </Row>
+            <Row label={field('labelLiveMusic')}>
+              {field('liveMusic')}
+              {note('liveMusicNote')}
+            </Row>
           </dl>
         </div>
       </div>

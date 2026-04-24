@@ -25,11 +25,16 @@ export const defaultContent = {
     logoUrl: '/logo.svg',
   },
   about: {
+    eyebrow: 'the score',
     heading: 'What is the Underscore?',
     body:
       "The Underscore is a dance score developed by Nancy Stark Smith in the early 1990s as a framework for improvisation rooted in Contact Improvisation. It moves through phases — arriving, preamble, small dance, solo, ensemble, harvest — that invite us to listen, to fall, to roll, to meet weight, and to let a shared dance grow out of simply showing up.\n\nOn or around the summer solstice, communities across the planet dance the Underscore at the same time. Different time zones, different rooms, one overlapping field of attention. That's the Global Underscore — and on 20 June 2026, Vienna joins in.",
+    worldwideText: 'More on the worldwide event at',
+    worldwideLinkLabel: 'globalunderscore.com',
+    worldwideUrl: 'https://globalunderscore.com/',
   },
   what: {
+    eyebrow: 'the form',
     heading: 'What is Contact Improvisation?',
     body:
       'Contact Improvisation is a movement form where two or more people share weight, momentum and touch, following the point of contact wherever it wants to go. No steps to learn. No right way to do it. Bring curious skin, soft joints, and a willingness to be surprised.',
@@ -49,6 +54,7 @@ export const defaultContent = {
     ],
   },
   event: {
+    eyebrow: 'practicalities',
     heroLine1: 'One afternoon.',
     heroLine2: 'Four hours of dance.',
     heroBody:
@@ -56,10 +62,13 @@ export const defaultContent = {
     date: 'Saturday, 20 June 2026',
     talkTime: '15:00 – 16:00',
     danceTime: '16:00 – 20:00',
+    danceNote: '',
     venue: 'Samdrubling',
     address: 'Beispielgasse 12, 1070 Vienna, Austria',
     price: '€25',
+    priceNote: '',
     liveMusic: 'Yes — live music throughout the score',
+    liveMusicNote: '',
     talkNote:
       "The Underscore Talk (15:00–16:00) is required if this is your first Underscore, and warmly welcomed for everyone else — it's a lovely way to settle in together.",
     labelDate: 'date',
@@ -68,11 +77,36 @@ export const defaultContent = {
     labelVenue: 'venue',
     labelPrice: 'price',
     labelLiveMusic: 'live music',
+    tag1: '🎶 live music',
+    tag2: '🌞 solstice',
+    tag3: '🌍 worldwide practice',
   },
   closing: {
+    eyebrow: 'join us',
     heading: 'Come dance.',
     body:
       "Wear what lets you move. Bring water, a layer, maybe the book you're reading. Arrive a little early. Roll around. Leave slightly rearranged.",
+  },
+  signup: {
+    nameLabel: 'your name',
+    emailLabel: 'email',
+    phoneLabel: 'phone',
+    phoneOptional: '(optional)',
+    didBeforeLabel: "I've danced an Underscore before",
+    didBeforeNote:
+      "If not, don't worry — the talk at 15:00 is for you, and we're glad you're coming.",
+    hasCiLabel: 'I have experience with Contact Improvisation',
+    noTalkLabel: 'I cannot attend the Underscore talk before the jam',
+    noTalkNote:
+      "Heard it all before? We warmly invite you to join us nonetheless: let's share our entry into the material.",
+    submitLabel: 'count me in →',
+    submittingLabel: 'sending…',
+    successHeading: "You're in. 🌞",
+    successBody:
+      "We've noted your name down. See you on 20 June — come as you are.",
+    successButton: 'sign someone else up',
+    footnote:
+      "€25 at the door · cash or card · we'll send a friendly reminder a few days before.",
   },
 };
 

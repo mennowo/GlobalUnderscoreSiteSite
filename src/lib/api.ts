@@ -11,8 +11,15 @@ export type Content = {
     aboutCta: string;
     logoUrl: string;
   };
-  about: { heading: string; body: string };
-  what: { heading: string; body: string };
+  about: {
+    eyebrow: string;
+    heading: string;
+    body: string;
+    worldwideText: string;
+    worldwideLinkLabel: string;
+    worldwideUrl: string;
+  };
+  what: { eyebrow: string; heading: string; body: string };
   gallery: {
     heading: string;
     subtitle: string;
@@ -22,16 +29,20 @@ export type Content = {
     images: Array<{ url: string; alt: string }>;
   };
   event: {
+    eyebrow: string;
     heroLine1: string;
     heroLine2: string;
     heroBody: string;
     date: string;
     talkTime: string;
     danceTime: string;
+    danceNote: string;
     venue: string;
     address: string;
     price: string;
+    priceNote: string;
     liveMusic: string;
+    liveMusicNote: string;
     talkNote: string;
     labelDate: string;
     labelTalk: string;
@@ -39,8 +50,28 @@ export type Content = {
     labelVenue: string;
     labelPrice: string;
     labelLiveMusic: string;
+    tag1: string;
+    tag2: string;
+    tag3: string;
   };
-  closing: { heading: string; body: string };
+  closing: { eyebrow: string; heading: string; body: string };
+  signup: {
+    nameLabel: string;
+    emailLabel: string;
+    phoneLabel: string;
+    phoneOptional: string;
+    didBeforeLabel: string;
+    didBeforeNote: string;
+    hasCiLabel: string;
+    noTalkLabel: string;
+    noTalkNote: string;
+    submitLabel: string;
+    submittingLabel: string;
+    successHeading: string;
+    successBody: string;
+    successButton: string;
+    footnote: string;
+  };
 };
 
 export type Me = {
