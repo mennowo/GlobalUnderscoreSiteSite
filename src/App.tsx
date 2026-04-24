@@ -7,20 +7,32 @@ import Gallery from './components/Gallery';
 import SignupForm from './components/SignupForm';
 import AdminBar from './components/AdminBar';
 import SignupsPanel from './components/SignupsPanel';
+import LoginPanel from './components/LoginPanel';
+import AccountPanel from './components/AccountPanel';
 import Footer from './components/Footer';
 
 export default function App() {
   const [content, setContent] = useState<Content | null>(null);
-  const [me, setMe] = useState<Me>({ user: null, oidcConfigured: false });
+  const [me, setMe] = useState<Me>({ user: null, oidcConfigured: false, localAuthEnabled: false });
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Content | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [showSignups, setShowSignups] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
+
+  const refreshMe = useCallback(() => {
+    fetchMe()
+      .then(setMe)
+      .catch(() =>
+        setMe({ user: null, oidcConfigured: false, localAuthEnabled: false }),
+      );
+  }, []);
 
   useEffect(() => {
     fetchContent().then(setContent).catch(console.error);
-    fetchMe().then(setMe).catch(() => setMe({ user: null, oidcConfigured: false }));
-  }, []);
+    refreshMe();
+  }, [refreshMe]);
 
   useEffect(() => {
     const url = content?.hero?.logoUrl;
@@ -110,8 +122,23 @@ export default function App() {
         onCancel={cancelEdit}
         onSave={commitEdit}
         onOpenSignups={() => setShowSignups(true)}
+        onOpenLogin={() => setShowLogin(true)}
+        onOpenAccount={() => setShowAccount(true)}
+        onLoggedOut={refreshMe}
       />
       {showSignups && <SignupsPanel onClose={() => setShowSignups(false)} />}
+      {showLogin && !me.user && (
+        <LoginPanel
+          onClose={() => setShowLogin(false)}
+          onLoggedIn={() => {
+            setShowLogin(false);
+            refreshMe();
+          }}
+        />
+      )}
+      {showAccount && me.user && (
+        <AccountPanel me={me.user} onClose={() => setShowAccount(false)} />
+      )}
       <main className="relative">
         <Hero content={view.hero} edit={editContext} />
         <About about={view.about} edit={editContext} />

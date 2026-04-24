@@ -1,4 +1,4 @@
-import { Content, EditCtx, Me } from '../lib/api';
+import { Content, EditCtx, Me, localLogout } from '../lib/api';
 import EditableText from './EditableText';
 
 type Props = {
@@ -11,6 +11,9 @@ type Props = {
   onCancel: () => void;
   onSave: () => void;
   onOpenSignups: () => void;
+  onOpenLogin: () => void;
+  onOpenAccount: () => void;
+  onLoggedOut: () => void;
 };
 
 export default function AdminBar({
@@ -23,18 +26,29 @@ export default function AdminBar({
   onCancel,
   onSave,
   onOpenSignups,
+  onOpenLogin,
+  onOpenAccount,
+  onLoggedOut,
 }: Props) {
   const loggedIn = !!me.user;
   const isAdmin = !!me.user?.isAdmin;
+  const isLocal = me.user?.authSource === 'local';
 
-  if (!me.oidcConfigured) {
+  if (!me.oidcConfigured && !me.localAuthEnabled) {
     return (
       <div className="sticky top-0 z-50 bg-mustard/20 backdrop-blur border-b border-mustard/40 text-sm text-ink/80">
         <div className="max-w-6xl mx-auto px-4 py-1.5">
-          Admin features disabled — set OIDC env vars to enable login & editing.
+          Admin features disabled — set SESSION_SECRET to enable local login, or configure OIDC.
         </div>
       </div>
     );
+  }
+
+  async function onLogoutClick(e: React.MouseEvent) {
+    if (!isLocal) return; // let the anchor navigate to /auth/logout for OIDC
+    e.preventDefault();
+    await localLogout().catch(() => {});
+    onLoggedOut();
   }
 
   return (
@@ -51,6 +65,9 @@ export default function AdminBar({
           <>
             <button className="btn-ghost !px-4 !py-1.5" onClick={onOpenSignups}>
               ☰ signups
+            </button>
+            <button className="btn-ghost !px-4 !py-1.5" onClick={onOpenAccount}>
+              ⚙ account
             </button>
             <button className="btn-primary !px-4 !py-1.5" onClick={onStartEdit}>
               ✎ edit page
@@ -78,13 +95,26 @@ export default function AdminBar({
           </span>
         )}
         {loggedIn ? (
-          <a className="text-ink/60 hover:text-ink" href="/auth/logout">
+          <a
+            className="text-ink/60 hover:text-ink"
+            href={isLocal ? '#' : '/auth/logout'}
+            onClick={onLogoutClick}
+          >
             log out
           </a>
         ) : (
-          <a className="text-ink/60 hover:text-ink" href="/auth/login">
-            admin log in
-          </a>
+          <>
+            {me.localAuthEnabled && (
+              <button className="text-ink/60 hover:text-ink" onClick={onOpenLogin}>
+                admin log in
+              </button>
+            )}
+            {me.oidcConfigured && (
+              <a className="text-ink/60 hover:text-ink" href="/auth/login">
+                {me.localAuthEnabled ? 'log in via SSO' : 'admin log in'}
+              </a>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -13,6 +13,10 @@ import {
 } from './signups.js';
 import { issueChallenge, verifyChallenge } from './captcha.js';
 import { saveUpload, UPLOADS_DIR, UPLOAD_LIMIT } from './uploads.js';
+import { buildSessionMiddleware } from './auth.js';
+import { bootstrapAdmin, findUserById } from './users.js';
+import { buildAuthRoutes } from './routes/auth.js';
+import { buildUserRoutes } from './routes/users.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -30,8 +34,16 @@ const oidcConfigured =
   !!process.env.OIDC_CLIENT_SECRET &&
   !!process.env.SESSION_SECRET;
 
+const localAuthEnabled =
+  process.env.LOCAL_AUTH_DISABLED !== '1' && !!process.env.SESSION_SECRET;
+
 const app = express();
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '200kb' }));
+
+if (localAuthEnabled) {
+  app.use(buildSessionMiddleware(process.env.SESSION_SECRET));
+}
 
 if (oidcConfigured) {
   app.use(
@@ -48,35 +60,65 @@ if (oidcConfigured) {
       routes: { login: '/auth/login', logout: '/auth/logout', callback: '/auth/callback' },
     }),
   );
-} else {
+}
+
+if (!oidcConfigured && !localAuthEnabled) {
   console.warn(
-    '[auth] OIDC env vars missing — running without auth. Admin endpoints will be disabled.',
+    '[auth] no auth configured — admin endpoints will be disabled. Set SESSION_SECRET to enable local auth, or configure OIDC env vars.',
   );
 }
 
 function currentUser(req) {
-  if (!oidcConfigured) return null;
-  if (!req.oidc?.isAuthenticated()) return null;
-  const u = req.oidc.user || {};
-  const email = (u.email || '').toLowerCase();
-  return {
-    sub: u.sub,
-    email,
-    name: u.name || u.nickname || email,
-    picture: u.picture || null,
-    isAdmin: ADMIN_EMAILS.includes(email),
-  };
+  if (localAuthEnabled && req.session?.userId) {
+    const row = findUserById(req.session.userId);
+    if (row) {
+      return {
+        sub: `local:${row.id}`,
+        email: row.email,
+        name: row.email,
+        picture: null,
+        isAdmin: !!row.is_admin,
+        authSource: 'local',
+      };
+    }
+  }
+  if (oidcConfigured && req.oidc?.isAuthenticated()) {
+    const u = req.oidc.user || {};
+    const email = (u.email || '').toLowerCase();
+    return {
+      sub: u.sub,
+      email,
+      name: u.name || u.nickname || email,
+      picture: u.picture || null,
+      isAdmin: ADMIN_EMAILS.includes(email),
+      authSource: 'oidc',
+    };
+  }
+  return null;
 }
 
 function requireAdmin(req, res, next) {
   const u = currentUser(req);
   if (!u) return res.status(401).json({ error: 'not authenticated' });
   if (!u.isAdmin) return res.status(403).json({ error: 'not an admin' });
+  req.currentUser = u;
   next();
 }
 
+// CSRF guard for cookie-authenticated mutations.
+// We accept either a custom fetch header (SPA calls) or the OIDC callback path (handled by express-openid-connect itself).
+function csrfGuard(req, res, next) {
+  if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') return next();
+  if (req.get('x-requested-with') === 'fetch') return next();
+  return res.status(403).json({ error: 'missing X-Requested-With header' });
+}
+
+if (localAuthEnabled) {
+  app.use('/auth/local', csrfGuard, buildAuthRoutes());
+}
+
 app.get('/me', (req, res) => {
-  res.json({ user: currentUser(req), oidcConfigured });
+  res.json({ user: currentUser(req), oidcConfigured, localAuthEnabled });
 });
 
 app.get('/api/content', async (_req, res) => {
@@ -87,7 +129,7 @@ app.get('/api/content', async (_req, res) => {
   }
 });
 
-app.put('/api/content', requireAdmin, async (req, res) => {
+app.put('/api/content', csrfGuard, requireAdmin, async (req, res) => {
   try {
     const next = req.body;
     if (!next || typeof next !== 'object') {
@@ -104,6 +146,7 @@ app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '1h', fallthrough: fal
 
 app.post(
   '/api/uploads',
+  csrfGuard,
   requireAdmin,
   express.raw({
     type: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
@@ -126,7 +169,7 @@ app.get('/api/challenge', (_req, res) => {
   res.json(issueChallenge());
 });
 
-app.post('/api/signup', async (req, res) => {
+app.post('/api/signup', csrfGuard, async (req, res) => {
   try {
     const body = req.body || {};
     const check = verifyChallenge(body.token, body.hp);
@@ -152,7 +195,7 @@ app.get('/api/signups', requireAdmin, async (_req, res) => {
   }
 });
 
-app.delete('/api/signups/:id', requireAdmin, (req, res) => {
+app.delete('/api/signups/:id', csrfGuard, requireAdmin, (req, res) => {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: 'bad id' });
@@ -176,6 +219,10 @@ app.get('/api/signups.csv', requireAdmin, async (_req, res) => {
   }
 });
 
+if (localAuthEnabled) {
+  app.use('/api/users', csrfGuard, buildUserRoutes(requireAdmin));
+}
+
 if (process.env.NODE_ENV === 'production') {
   const dist = path.join(ROOT, 'dist');
   app.use(express.static(dist));
@@ -192,8 +239,27 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[server] listening on 0.0.0.0:${PORT}`);
-  if (oidcConfigured) console.log(`[server] OIDC issuer: ${process.env.OIDC_ISSUER}`);
-  if (ADMIN_EMAILS.length) console.log(`[server] admins: ${ADMIN_EMAILS.join(', ')}`);
-});
+async function start() {
+  if (localAuthEnabled) {
+    try {
+      const result = await bootstrapAdmin({
+        email: process.env.BOOTSTRAP_ADMIN_EMAIL,
+        password: process.env.BOOTSTRAP_ADMIN_PASSWORD,
+      });
+      if (result.action && result.action !== 'skipped' && result.action !== 'noop') {
+        console.log(`[auth] bootstrap admin ${result.action}: ${result.email}`);
+      }
+    } catch (err) {
+      console.error('[auth] bootstrap failed:', err.message || err);
+    }
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[server] listening on 0.0.0.0:${PORT}`);
+    if (oidcConfigured) console.log(`[server] OIDC issuer: ${process.env.OIDC_ISSUER}`);
+    if (localAuthEnabled) console.log('[server] local auth enabled');
+    if (ADMIN_EMAILS.length) console.log(`[server] OIDC admins: ${ADMIN_EMAILS.join(', ')}`);
+  });
+}
+
+start();

@@ -85,9 +85,21 @@ export type SignupField = {
   options?: SignupRadioOption[];
 };
 
+export type AuthSource = 'local' | 'oidc';
+
+export type AuthUser = {
+  sub: string;
+  email: string;
+  name: string;
+  picture: string | null;
+  isAdmin: boolean;
+  authSource: AuthSource;
+};
+
 export type Me = {
-  user: { sub: string; email: string; name: string; picture: string | null; isAdmin: boolean } | null;
+  user: AuthUser | null;
   oidcConfigured: boolean;
+  localAuthEnabled: boolean;
 };
 
 export type Signup = {
@@ -96,9 +108,28 @@ export type Signup = {
   data: Record<string, string | boolean>;
 };
 
+export type ManagedUser = {
+  id: number;
+  email: string;
+  is_admin: number;
+  created_at: string;
+};
+
+const EMPTY_ME: Me = { user: null, oidcConfigured: false, localAuthEnabled: false };
+
+const CSRF_HEADER = { 'x-requested-with': 'fetch' } as const;
+
+async function jsonOrThrow<T>(r: Response, fallback = 'request failed'): Promise<T> {
+  if (!r.ok) {
+    const msg = (await r.json().catch(() => ({}))).error || fallback;
+    throw new Error(msg);
+  }
+  return r.json();
+}
+
 export async function fetchMe(): Promise<Me> {
   const r = await fetch('/me', { credentials: 'same-origin' });
-  if (!r.ok) return { user: null, oidcConfigured: false };
+  if (!r.ok) return EMPTY_ME;
   return r.json();
 }
 
@@ -111,7 +142,7 @@ export async function fetchContent(): Promise<Content> {
 export async function saveContent(next: Content): Promise<void> {
   const r = await fetch('/api/content', {
     method: 'PUT',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...CSRF_HEADER },
     credentials: 'same-origin',
     body: JSON.stringify(next),
   });
@@ -121,7 +152,7 @@ export async function saveContent(next: Content): Promise<void> {
 export async function uploadImage(file: File): Promise<{ url: string }> {
   const r = await fetch('/api/uploads', {
     method: 'POST',
-    headers: { 'content-type': file.type || 'application/octet-stream' },
+    headers: { 'content-type': file.type || 'application/octet-stream', ...CSRF_HEADER },
     credentials: 'same-origin',
     body: file,
   });
@@ -139,7 +170,7 @@ export async function submitSignup(payload: {
 }): Promise<void> {
   const r = await fetch('/api/signup', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...CSRF_HEADER },
     body: JSON.stringify(payload),
   });
   if (!r.ok) {
@@ -167,7 +198,65 @@ export async function fetchSignups(): Promise<{
 export async function deleteSignup(id: number): Promise<void> {
   const r = await fetch(`/api/signups/${id}`, {
     method: 'DELETE',
+    headers: { ...CSRF_HEADER },
     credentials: 'same-origin',
   });
   if (!r.ok) throw new Error('delete failed');
+}
+
+export async function localLogin(email: string, password: string): Promise<void> {
+  const r = await fetch('/auth/local/login', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...CSRF_HEADER },
+    credentials: 'same-origin',
+    body: JSON.stringify({ email, password }),
+  });
+  await jsonOrThrow(r, 'login failed');
+}
+
+export async function localLogout(): Promise<void> {
+  await fetch('/auth/local/logout', {
+    method: 'POST',
+    headers: { ...CSRF_HEADER },
+    credentials: 'same-origin',
+  });
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  const r = await fetch('/auth/local/password', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...CSRF_HEADER },
+    credentials: 'same-origin',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  await jsonOrThrow(r, 'password change failed');
+}
+
+export async function listUsers(): Promise<ManagedUser[]> {
+  const r = await fetch('/api/users', {
+    headers: { ...CSRF_HEADER },
+    credentials: 'same-origin',
+  });
+  const data = await jsonOrThrow<{ users: ManagedUser[] }>(r, 'failed to load users');
+  return data.users;
+}
+
+export async function createUser(email: string, password: string): Promise<ManagedUser> {
+  const r = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...CSRF_HEADER },
+    credentials: 'same-origin',
+    body: JSON.stringify({ email, password, isAdmin: true }),
+  });
+  const data = await jsonOrThrow<{ user: ManagedUser }>(r, 'create failed');
+  return data.user;
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  const r = await fetch(`/api/users/${id}`, {
+    method: 'DELETE',
+    headers: { ...CSRF_HEADER },
+    credentials: 'same-origin',
+  });
+  await jsonOrThrow(r, 'delete failed');
 }
