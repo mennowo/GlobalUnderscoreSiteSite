@@ -122,8 +122,7 @@ function AboutBlockView({
       }
     });
 
-  // keep the existing visual rhythm: offset/rotate every other block on desktop
-  const offsetClass = index % 2 === 1 ? 'md:mt-20 md:rotate-[0.4deg]' : '';
+  const offsetClass = index % 2 === 1 ? 'md:rotate-[0.4deg]' : '';
 
   return (
     <div className={`card p-8 md:p-10 ${offsetClass}`}>
