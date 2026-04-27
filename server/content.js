@@ -98,6 +98,13 @@ export const defaultContent = {
     heading: 'Come dance.',
     body:
       "Wear what lets you move. Bring water, a layer, maybe the book you're reading. Arrive a little early. Roll around. Leave slightly rearranged.",
+    terms: {
+      leadPrefix: 'By signing up, you explicitly agree to ',
+      linkText: 'the terms and conditions',
+      leadSuffix: ' for this event.',
+      body:
+        "Terms and conditions\n\nBy registering, you accept responsibility for your own actions and their consequences during the event. You explicitly accept that you are responsible for your own physical and emotional wellbeing during the event, and will not hold the organisers liable for any harm or damage that might occur. Each participant is responsible for deciding which activities they take part in, based on their own physical and mental condition. If you have a prior injury or any health-related concerns, please consult your doctor and inform us in advance.\n\nThe consumption of alcohol or mind-altering substances, as well as participation under their influence, is strictly prohibited. Inappropriate behavior (such as harassment or offensive conduct) may result in removal from the event.\n\nPhotos and video recordings may be taken during the event for promotional purposes. If you do not wish to appear in any public materials, please let us know before the event.\n\nWe expect you to come with prior experience with Contact Improvisation.\n\nIf you sign up and cancel after the 31th of May, no reimbursement will be payed.",
+    },
   },
   signup: {
     fields: [

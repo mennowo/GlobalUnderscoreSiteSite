@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Content,
   EditCtx,
@@ -40,6 +41,16 @@ export default function SignupForm({
   const [token, setToken] = useState('');
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [err, setErr] = useState('');
+  const [showTerms, setShowTerms] = useState(false);
+
+  useEffect(() => {
+    if (!showTerms) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowTerms(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showTerms]);
 
   useEffect(() => {
     fetchChallenge().then((c) => setToken(c.token)).catch(() => {});
@@ -101,6 +112,32 @@ export default function SignupForm({
             className="mt-5 text-ink/80 leading-relaxed"
             multiline
           />
+          <p className="mt-5 text-sm text-ink/60 leading-relaxed">
+            <EditableText
+              as="span"
+              canEdit={edit.canEdit}
+              value={closing.terms.leadPrefix}
+              onChange={(v) => edit.setField(['closing', 'terms', 'leadPrefix'], v)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowTerms(true)}
+              className="underline decoration-coral/60 hover:decoration-coral text-ink/80 hover:text-ink"
+            >
+              <EditableText
+                as="span"
+                canEdit={edit.canEdit}
+                value={closing.terms.linkText}
+                onChange={(v) => edit.setField(['closing', 'terms', 'linkText'], v)}
+              />
+            </button>
+            <EditableText
+              as="span"
+              canEdit={edit.canEdit}
+              value={closing.terms.leadSuffix}
+              onChange={(v) => edit.setField(['closing', 'terms', 'leadSuffix'], v)}
+            />
+          </p>
         </div>
 
         <form
@@ -229,6 +266,41 @@ export default function SignupForm({
           )}
         </form>
       </div>
+      {showTerms &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-sm flex items-start md:items-center justify-center p-4"
+            onClick={() => setShowTerms(false)}
+          >
+            <div
+              className="w-full max-w-2xl max-h-[90vh] bg-cream rounded-3xl shadow-soft border border-white/60 flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 px-6 py-4 border-b border-ink/10">
+                <h2 className="font-display text-2xl">Terms &amp; conditions</h2>
+                <div className="flex-1" />
+                <button
+                  type="button"
+                  onClick={() => setShowTerms(false)}
+                  className="text-ink/60 hover:text-ink text-xl leading-none px-2"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="overflow-auto flex-1 p-6">
+                <EditableText
+                  as="div"
+                  canEdit={edit.canEdit}
+                  value={closing.terms.body}
+                  onChange={(v) => edit.setField(['closing', 'terms', 'body'], v)}
+                  className="text-ink/80 leading-relaxed text-sm"
+                  multiline
+                />
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }

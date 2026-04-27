@@ -30,7 +30,17 @@ export type Content = {
     tag3: string;
     rows: EventRow[];
   };
-  closing: { eyebrow: string; heading: string; body: string };
+  closing: {
+    eyebrow: string;
+    heading: string;
+    body: string;
+    terms: {
+      leadPrefix: string;
+      linkText: string;
+      leadSuffix: string;
+      body: string;
+    };
+  };
   signup: {
     fields: SignupField[];
     submitLabel: string;
