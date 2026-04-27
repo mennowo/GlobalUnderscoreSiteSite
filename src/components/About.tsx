@@ -24,7 +24,7 @@ export default function About({ about, edit }: { about: Content['about']; edit: 
 
   return (
     <section id="about" className="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
-      <div className="grid md:grid-cols-2 gap-10 md:gap-16">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
         {blocks.map((block, i) => (
           <AboutBlockView
             key={block.id}
