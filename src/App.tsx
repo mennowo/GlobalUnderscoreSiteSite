@@ -95,6 +95,10 @@ export default function App() {
     if (title) document.title = title;
   }, [view?.siteTitle]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', view?.theme ?? 'rustic');
+  }, [view?.theme]);
+
   const setField = useCallback(
     (path: string[], value: unknown) => {
       setDraft((prev) => {
@@ -137,6 +141,7 @@ export default function App() {
         me={me}
         header={view.header}
         siteTitle={view.siteTitle}
+        theme={view.theme}
         edit={editContext}
         editing={editing}
         saveState={saveState}

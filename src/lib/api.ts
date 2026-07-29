@@ -1,3 +1,5 @@
+export type ThemeId = 'rustic' | 'coastal' | 'forest' | 'dusk' | 'minimal';
+
 export type EmailConfig = {
   from: string;
   confirmation: { subject: string; body: string };
@@ -5,6 +7,7 @@ export type EmailConfig = {
 };
 
 export type Content = {
+  theme?: ThemeId;
   siteTitle: string;
   header: { brand: string };
   email: EmailConfig;

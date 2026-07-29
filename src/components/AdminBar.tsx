@@ -1,10 +1,19 @@
-import { Content, EditCtx, Me, localLogout } from '../lib/api';
+import { Content, EditCtx, Me, ThemeId, localLogout } from '../lib/api';
 import EditableText from './EditableText';
+
+const THEME_PRESETS: { id: ThemeId; label: string; swatch: string }[] = [
+  { id: 'rustic',   label: 'Rustic',   swatch: '#E0674A' },
+  { id: 'coastal',  label: 'Coastal',  swatch: '#2E82A3' },
+  { id: 'forest',   label: 'Forest',   swatch: '#4A8C42' },
+  { id: 'dusk',     label: 'Dusk',     swatch: '#9B4ABF' },
+  { id: 'minimal',  label: 'Minimal',  swatch: '#1A1A1A' },
+];
 
 type Props = {
   me: Me;
   header: Content['header'];
   siteTitle: string;
+  theme?: ThemeId;
   edit: EditCtx;
   editing: boolean;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
@@ -23,6 +32,7 @@ export default function AdminBar({
   me,
   header,
   siteTitle,
+  theme,
   edit,
   editing,
   saveState,
@@ -102,6 +112,30 @@ export default function AdminBar({
               {saveState === 'saved' && 'saved ✓'}
               {saveState === 'error' && 'save failed'}
             </span>
+            <span className="text-ink/30 select-none">|</span>
+            <span className="text-ink/40 text-xs shrink-0">theme:</span>
+            <div className="flex items-center gap-1.5">
+              {THEME_PRESETS.map((t) => {
+                const active = (theme ?? 'rustic') === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    title={t.label}
+                    onClick={() => edit.setField(['theme'], t.id)}
+                    className="rounded-full transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-coral"
+                    style={{
+                      width: 18,
+                      height: 18,
+                      background: t.swatch,
+                      outline: active ? `2px solid ${t.swatch}` : 'none',
+                      outlineOffset: 2,
+                      opacity: active ? 1 : 0.55,
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <span className="text-ink/30 select-none">|</span>
             <button className="btn-ghost !px-4 !py-1.5" onClick={onOpenEmailSettings}>
               ✉ email templates
             </button>

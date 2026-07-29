@@ -2,6 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── colour themes ──────────────────────────────────────────────────────── */
+/* Colour values: space-separated RGB channels (Tailwind / opacity support). */
+/* Gradient opacities: --grad-o1/o2/o3 for the three background blobs.      */
+
+:root {
+  /* Rustic (default) — warm earth tones */
+  --color-cream:      251 246 236;
+  --color-sand:       242 233 216;
+  --color-coral:      224 103  74;
+  --color-terracotta: 194  81  64;
+  --color-sage:       139 168 136;
+  --color-ink:         42  34  27;
+  --color-mustard:    217 166  72;
+  --grad-o1: 0.10;
+  --grad-o2: 0.18;
+  --grad-o3: 0.10;
+}
+
+[data-theme="coastal"] {
+  /* Coastal — clear sky blue base, ocean accent, seafoam secondary */
+  --color-cream:      218 238 248;
+  --color-sand:       200 226 240;
+  --color-coral:       46 130 163;
+  --color-terracotta:  27  98 128;
+  --color-sage:       114 191 199;
+  --color-ink:         25  46  56;
+  --color-mustard:    232 187 106;
+  --grad-o1: 0.22;
+  --grad-o2: 0.30;
+  --grad-o3: 0.16;
+}
+
+[data-theme="forest"] {
+  /* Forest — pale moss green base, botanical accent, lavender secondary */
+  --color-cream:      224 238 214;
+  --color-sand:       208 228 196;
+  --color-coral:       74 140  66;
+  --color-terracotta:  49 102  51;
+  --color-sage:       154 114 192;
+  --color-ink:         27  42  24;
+  --color-mustard:    197 168  62;
+  --grad-o1: 0.24;
+  --grad-o2: 0.22;
+  --grad-o3: 0.16;
+}
+
+[data-theme="dusk"] {
+  /* Dusk — lavender base, violet accent, rose secondary */
+  --color-cream:      238 224 248;
+  --color-sand:       228 210 242;
+  --color-coral:      155  74 191;
+  --color-terracotta: 122  45 153;
+  --color-sage:       224 122 122;
+  --color-ink:         42  27  46;
+  --color-mustard:    212 168  72;
+  --grad-o1: 0.22;
+  --grad-o2: 0.30;
+  --grad-o3: 0.18;
+}
+
+[data-theme="minimal"] {
+  /* Minimal — crisp white base, near-monochrome, warm gold accent */
+  --color-cream:      252 252 250;
+  --color-sand:       244 244 242;
+  --color-coral:       26  26  26;
+  --color-terracotta:   8   8   8;
+  --color-sage:       136 136 130;
+  --color-ink:         17  17  15;
+  --color-mustard:    184 144  42;
+  --grad-o1: 0.04;
+  --grad-o2: 0.07;
+  --grad-o3: 0.12;
+}
+
+/* ── base ───────────────────────────────────────────────────────────────── */
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -9,9 +84,9 @@
   body {
     @apply bg-cream text-ink font-sans antialiased;
     background-image:
-      radial-gradient(ellipse at 10% 0%, rgba(224, 103, 74, 0.10), transparent 55%),
-      radial-gradient(ellipse at 100% 30%, rgba(139, 168, 136, 0.18), transparent 50%),
-      radial-gradient(ellipse at 50% 100%, rgba(217, 166, 72, 0.10), transparent 60%);
+      radial-gradient(ellipse at 10% 0%, rgb(var(--color-coral) / var(--grad-o1)), transparent 55%),
+      radial-gradient(ellipse at 100% 30%, rgb(var(--color-sage) / var(--grad-o2)), transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgb(var(--color-mustard) / var(--grad-o3)), transparent 60%);
     background-attachment: fixed;
   }
   h1, h2, h3 {

@@ -4,20 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: '#FBF6EC',
-        sand: '#F2E9D8',
-        coral: '#E0674A',
-        terracotta: '#C25140',
-        sage: '#8BA888',
-        ink: '#2A221B',
-        mustard: '#D9A648',
+        cream: 'rgb(var(--color-cream) / <alpha-value>)',
+        sand: 'rgb(var(--color-sand) / <alpha-value>)',
+        coral: 'rgb(var(--color-coral) / <alpha-value>)',
+        terracotta: 'rgb(var(--color-terracotta) / <alpha-value>)',
+        sage: 'rgb(var(--color-sage) / <alpha-value>)',
+        ink: 'rgb(var(--color-ink) / <alpha-value>)',
+        mustard: 'rgb(var(--color-mustard) / <alpha-value>)',
       },
       fontFamily: {
         display: ['Fraunces', 'ui-serif', 'Georgia', 'serif'],
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        soft: '0 10px 40px -15px rgba(42, 34, 27, 0.25)',
+        soft: '0 10px 40px -15px rgb(var(--color-ink) / 0.25)',
       },
       keyframes: {
         float: {

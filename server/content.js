@@ -6,6 +6,7 @@ const KEY = 'site_content';
 const LEGACY_FILE = path.join(DATA_DIR, 'content.json');
 
 export const defaultContent = {
+  theme: 'rustic',
   siteTitle: 'Global Underscore Vienna · 20 June 2026',
   header: {
     brand: '◯ Global Underscore',
