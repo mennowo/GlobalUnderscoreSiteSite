@@ -1,5 +1,13 @@
+export type EmailConfig = {
+  from: string;
+  confirmation: { subject: string; body: string };
+  welcome: { subject: string; body: string };
+};
+
 export type Content = {
+  siteTitle: string;
   header: { brand: string };
+  email: EmailConfig;
   footer: { brand: string; tagline: string };
   hero: {
     eyebrow: string;
@@ -116,6 +124,7 @@ export type Signup = {
   id: number;
   ts: string;
   data: Record<string, string | boolean>;
+  confirmed: boolean;
 };
 
 export type ManagedUser = {
@@ -195,8 +204,23 @@ export async function fetchChallenge(): Promise<{ token: string }> {
   return r.json();
 }
 
+export async function broadcastEmail(payload: {
+  subject: string;
+  body: string;
+  audience: 'all' | 'confirmed';
+}): Promise<{ sent: number }> {
+  const r = await fetch('/api/email/broadcast', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...CSRF_HEADER },
+    credentials: 'same-origin',
+    body: JSON.stringify(payload),
+  });
+  return jsonOrThrow<{ sent: number }>(r, 'broadcast failed');
+}
+
 export async function fetchSignups(): Promise<{
   count: number;
+  confirmedCount: number;
   fields: SignupField[];
   rows: Signup[];
 }> {

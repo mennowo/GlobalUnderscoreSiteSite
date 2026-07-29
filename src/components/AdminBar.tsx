@@ -4,6 +4,7 @@ import EditableText from './EditableText';
 type Props = {
   me: Me;
   header: Content['header'];
+  siteTitle: string;
   edit: EditCtx;
   editing: boolean;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
@@ -11,6 +12,8 @@ type Props = {
   onCancel: () => void;
   onSave: () => void;
   onOpenSignups: () => void;
+  onOpenBroadcast: () => void;
+  onOpenEmailSettings: () => void;
   onOpenLogin: () => void;
   onOpenAccount: () => void;
   onLoggedOut: () => void;
@@ -19,6 +22,7 @@ type Props = {
 export default function AdminBar({
   me,
   header,
+  siteTitle,
   edit,
   editing,
   saveState,
@@ -26,6 +30,8 @@ export default function AdminBar({
   onCancel,
   onSave,
   onOpenSignups,
+  onOpenBroadcast,
+  onOpenEmailSettings,
   onOpenLogin,
   onOpenAccount,
   onLoggedOut,
@@ -60,11 +66,26 @@ export default function AdminBar({
           onChange={(v) => edit.setField(['header', 'brand'], v)}
           className="font-display text-base"
         />
+        {edit.canEdit && (
+          <>
+            <span className="text-ink/30 select-none">|</span>
+            <span className="text-ink/40 text-xs shrink-0">tab title:</span>
+            <EditableText
+              canEdit={edit.canEdit}
+              value={siteTitle}
+              onChange={(v) => edit.setField(['siteTitle'], v)}
+              className="text-xs text-ink/60 min-w-0"
+            />
+          </>
+        )}
         <div className="flex-1" />
         {loggedIn && isAdmin && !editing && (
           <>
             <button className="btn-ghost !px-4 !py-1.5" onClick={onOpenSignups}>
               ☰ signups
+            </button>
+            <button className="btn-ghost !px-4 !py-1.5" onClick={onOpenBroadcast}>
+              ✉ broadcast
             </button>
             <button className="btn-ghost !px-4 !py-1.5" onClick={onOpenAccount}>
               ⚙ account
@@ -81,6 +102,9 @@ export default function AdminBar({
               {saveState === 'saved' && 'saved ✓'}
               {saveState === 'error' && 'save failed'}
             </span>
+            <button className="btn-ghost !px-4 !py-1.5" onClick={onOpenEmailSettings}>
+              ✉ email templates
+            </button>
             <button className="btn-ghost !px-4 !py-1.5" onClick={onCancel}>
               cancel
             </button>

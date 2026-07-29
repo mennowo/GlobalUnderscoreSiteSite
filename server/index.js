@@ -9,10 +9,19 @@ import { readContent, writeContent } from './content.js';
 import {
   insertSignup,
   listSignups,
+  listConfirmedSignups,
   countSignups,
+  countConfirmedSignups,
+  confirmSignupByToken,
   deleteSignup,
   signupsAsCsv,
 } from './signups.js';
+import {
+  isEmailConfigured,
+  sendConfirmationEmail,
+  sendWelcomeEmail,
+  sendBroadcast,
+} from './email.js';
 import { issueChallenge, verifyChallenge } from './captcha.js';
 import { saveUpload, UPLOADS_DIR, UPLOAD_LIMIT } from './uploads.js';
 import { buildSessionMiddleware } from './auth.js';
@@ -85,6 +94,14 @@ const signupLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: { error: 'too many signups from this address, try again later' },
+});
+
+const confirmLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'too many confirmation attempts' },
 });
 
 if (localAuthEnabled) {
@@ -230,10 +247,50 @@ app.post('/api/signup', signupLimiter, csrfGuard, async (req, res) => {
     const check = verifyChallenge(body.token, body.hp);
     if (!check.ok) return res.status(400).json({ error: `rejected: ${check.reason}` });
     const content = await readContent();
-    const row = insertSignup(body, content.signup?.fields || []);
-    res.json({ ok: true, row });
+    const emailEnabled = isEmailConfigured() && content.email?.from && content.email?.confirmation;
+    const { signup, token } = insertSignup(body, content.signup?.fields || [], !emailEnabled);
+    if (emailEnabled) {
+      sendConfirmationEmail(signup, token, content.email, BASE_URL).catch((err) => {
+        console.error('[email] confirmation send failed:', err.message);
+      });
+    }
+    res.json({ ok: true, row: signup });
   } catch (err) {
     res.status(400).json({ error: String(err.message || err) });
+  }
+});
+
+app.get('/api/confirm/:token', confirmLimiter, async (req, res) => {
+  try {
+    const signup = confirmSignupByToken(req.params.token);
+    if (!signup) return res.redirect('/?confirm=invalid');
+    const content = await readContent();
+    if (isEmailConfigured() && content.email?.from && content.email?.welcome && signup.data?.email) {
+      sendWelcomeEmail(signup, content.email).catch((err) => {
+        console.error('[email] welcome send failed:', err.message);
+      });
+    }
+    res.redirect('/?confirmed=1');
+  } catch (err) {
+    console.error('[confirm]', err);
+    res.redirect('/?confirm=error');
+  }
+});
+
+app.post('/api/email/broadcast', csrfGuard, requireAdmin, async (req, res) => {
+  try {
+    const { subject, body, audience } = req.body || {};
+    if (!subject || !body) return res.status(400).json({ error: 'subject and body are required' });
+    if (!isEmailConfigured()) return res.status(400).json({ error: 'RESEND_API_KEY is not configured' });
+    const content = await readContent();
+    if (!content.email?.from) return res.status(400).json({ error: 'email.from is not configured' });
+    const rows = audience === 'confirmed' ? listConfirmedSignups() : listSignups();
+    const recipients = [...new Set(rows.filter((r) => r.data?.email).map((r) => r.data.email))];
+    if (recipients.length === 0) return res.json({ ok: true, sent: 0 });
+    const sent = await sendBroadcast({ from: content.email.from, recipients, subject, body });
+    res.json({ ok: true, sent });
+  } catch (err) {
+    res.status(500).json({ error: String(err.message || err) });
   }
 });
 
@@ -242,6 +299,7 @@ app.get('/api/signups', requireAdmin, async (_req, res) => {
     const content = await readContent();
     res.json({
       count: countSignups(),
+      confirmedCount: countConfirmedSignups(),
       fields: content.signup?.fields || [],
       rows: listSignups(),
     });

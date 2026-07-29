@@ -7,6 +7,8 @@ import Gallery from './components/Gallery';
 import SignupForm from './components/SignupForm';
 import AdminBar from './components/AdminBar';
 import SignupsPanel from './components/SignupsPanel';
+import BroadcastPanel from './components/BroadcastPanel';
+import EmailSettingsPanel from './components/EmailSettingsPanel';
 import LoginPanel from './components/LoginPanel';
 import AccountPanel from './components/AccountPanel';
 import Footer from './components/Footer';
@@ -18,8 +20,16 @@ export default function App() {
   const [draft, setDraft] = useState<Content | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [showSignups, setShowSignups] = useState(false);
+  const [showBroadcast, setShowBroadcast] = useState(false);
+  const [showEmailSettings, setShowEmailSettings] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const [confirmedBanner, setConfirmedBanner] = useState<'ok' | 'invalid' | null>(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.has('confirmed')) return 'ok';
+    if (p.get('confirm') === 'invalid' || p.get('confirm') === 'error') return 'invalid';
+    return null;
+  });
 
   const refreshMe = useCallback(() => {
     fetchMe()
@@ -32,6 +42,12 @@ export default function App() {
   useEffect(() => {
     fetchContent().then(setContent).catch(console.error);
     refreshMe();
+    if (confirmedBanner !== null) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('confirmed');
+      url.searchParams.delete('confirm');
+      window.history.replaceState({}, '', url.toString());
+    }
   }, [refreshMe]);
 
   useEffect(() => {
@@ -74,6 +90,11 @@ export default function App() {
 
   const view = canEdit && draft ? draft : content;
 
+  useEffect(() => {
+    const title = view?.siteTitle;
+    if (title) document.title = title;
+  }, [view?.siteTitle]);
+
   const setField = useCallback(
     (path: string[], value: unknown) => {
       setDraft((prev) => {
@@ -115,6 +136,7 @@ export default function App() {
       <AdminBar
         me={me}
         header={view.header}
+        siteTitle={view.siteTitle}
         edit={editContext}
         editing={editing}
         saveState={saveState}
@@ -122,11 +144,29 @@ export default function App() {
         onCancel={cancelEdit}
         onSave={commitEdit}
         onOpenSignups={() => setShowSignups(true)}
+        onOpenBroadcast={() => setShowBroadcast(true)}
+        onOpenEmailSettings={() => setShowEmailSettings(true)}
         onOpenLogin={() => setShowLogin(true)}
         onOpenAccount={() => setShowAccount(true)}
         onLoggedOut={refreshMe}
       />
+      {confirmedBanner && (
+        <div className={`px-4 py-3 text-sm text-center flex items-center justify-center gap-3 ${confirmedBanner === 'ok' ? 'bg-sage/20 text-ink' : 'bg-terracotta/10 text-terracotta'}`}>
+          {confirmedBanner === 'ok'
+            ? '✓ Your email is confirmed! Check your inbox for event details.'
+            : 'That confirmation link is invalid or has already been used.'}
+          <button onClick={() => setConfirmedBanner(null)} className="opacity-60 hover:opacity-100 text-base leading-none">×</button>
+        </div>
+      )}
       {showSignups && <SignupsPanel onClose={() => setShowSignups(false)} />}
+      {showBroadcast && <BroadcastPanel onClose={() => setShowBroadcast(false)} />}
+      {showEmailSettings && canEdit && (
+        <EmailSettingsPanel
+          email={view.email}
+          edit={editContext}
+          onClose={() => setShowEmailSettings(false)}
+        />
+      )}
       {showLogin && !me.user && (
         <LoginPanel
           onClose={() => setShowLogin(false)}

@@ -6,8 +6,20 @@ const KEY = 'site_content';
 const LEGACY_FILE = path.join(DATA_DIR, 'content.json');
 
 export const defaultContent = {
+  siteTitle: 'Global Underscore Vienna · 20 June 2026',
   header: {
     brand: '◯ Global Underscore',
+  },
+  email: {
+    from: 'Global Underscore Vienna <noreply@yourdomain.com>',
+    confirmation: {
+      subject: 'Confirm your spot — Global Underscore Vienna',
+      body: 'Hi {{name}},\n\nThanks for signing up for the Global Underscore Vienna on 20 June 2026!\n\nPlease confirm your email address by clicking the link below:\n\n{{confirmUrl}}\n\nSee you on the dance floor.\n\nThe Global Underscore team',
+    },
+    welcome: {
+      subject: "You're confirmed — Global Underscore Vienna",
+      body: "Hi {{name}},\n\nYou're all confirmed for the Global Underscore Vienna on Saturday, 20 June 2026!\n\nHere's what you need to know:\n\n• Date: Saturday, 20 June 2026\n• Talk (required for first-timers): 15:00 – 16:00\n• Dance: 16:00 – 20:00\n• Venue: Samdrubling, Beispielgasse 12, 1070 Vienna\n• Price: €25 at the door (cash or card)\n\nWear what lets you move. Bring water, a layer, and an open spirit.\n\nSee you there!\n\nThe Global Underscore team",
+    },
   },
   footer: {
     brand: '◯ Global Underscore · Vienna',

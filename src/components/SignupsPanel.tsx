@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Signup, SignupField, deleteSignup, fetchSignups } from '../lib/api';
+import BroadcastPanel from './BroadcastPanel';
 
 function formatCell(field: SignupField, v: string | boolean | undefined) {
   if (field.kind === 'checkbox') {
@@ -36,8 +37,10 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
   const [rows, setRows] = useState<Signup[] | null>(null);
   const [fields, setFields] = useState<SignupField[]>([]);
   const [count, setCount] = useState(0);
+  const [confirmedCount, setConfirmedCount] = useState(0);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showBroadcast, setShowBroadcast] = useState(false);
 
   async function load() {
     setErr(null);
@@ -46,6 +49,7 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
       setRows(data.rows);
       setFields(data.fields);
       setCount(data.count);
+      setConfirmedCount(data.confirmedCount);
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'failed');
     }
@@ -73,18 +77,26 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
 
   const checkboxFields = fields.filter((f) => f.kind === 'checkbox');
 
+  if (showBroadcast) {
+    return <BroadcastPanel onClose={() => setShowBroadcast(false)} />;
+  }
+
   return (
     <div className="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-sm flex items-start md:items-center justify-center p-4">
       <div className="w-full max-w-5xl max-h-[90vh] bg-cream rounded-3xl shadow-soft border border-white/60 flex flex-col overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-ink/10 flex-wrap">
           <h2 className="font-display text-2xl">Signups</h2>
           <span className="chip text-xs">{count} total</span>
+          <span className="chip !bg-sage/20 text-xs">{confirmedCount} confirmed</span>
           {checkboxFields.map((f) => (
             <span key={f.id} className="chip text-xs">
               {rows?.filter((r) => !!r.data?.[f.id]).length ?? 0} {f.label.toLowerCase()}
             </span>
           ))}
           <div className="flex-1" />
+          <button className="btn-ghost !px-4 !py-1.5 text-sm" onClick={() => setShowBroadcast(true)}>
+            ✉ broadcast
+          </button>
           <a href="/api/signups.csv" className="btn-ghost !px-4 !py-1.5 text-sm">
             ↓ CSV
           </a>
@@ -109,6 +121,7 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
               <thead className="sticky top-0 bg-sand/90 backdrop-blur">
                 <tr className="text-left text-ink/60 text-xs uppercase tracking-widest">
                   <th className="px-4 py-3 font-medium">when</th>
+                  <th className="px-4 py-3 font-medium">status</th>
                   {fields.map((f) => (
                     <th key={f.id} className="px-4 py-3 font-medium">
                       {f.label}
@@ -122,6 +135,13 @@ export default function SignupsPanel({ onClose }: { onClose: () => void }) {
                   <tr key={r.id} className="border-t border-ink/5 hover:bg-white/40">
                     <td className="px-4 py-3 text-ink/60 whitespace-nowrap">
                       {new Date(r.ts).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      {r.confirmed ? (
+                        <span className="chip !bg-sage/20 text-xs">confirmed</span>
+                      ) : (
+                        <span className="chip !bg-mustard/20 text-xs">pending</span>
+                      )}
                     </td>
                     {fields.map((f) => (
                       <td key={f.id} className="px-4 py-3 align-top">

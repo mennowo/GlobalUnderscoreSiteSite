@@ -16,7 +16,9 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS signups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ts TEXT NOT NULL,
-    data TEXT NOT NULL
+    data TEXT NOT NULL,
+    confirmed INTEGER NOT NULL DEFAULT 0,
+    confirm_token TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_signups_ts ON signups(ts);
 
@@ -36,9 +38,21 @@ if (!signupCols.has('data')) {
     CREATE TABLE signups (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ts TEXT NOT NULL,
-      data TEXT NOT NULL
+      data TEXT NOT NULL,
+      confirmed INTEGER NOT NULL DEFAULT 0,
+      confirm_token TEXT
     );
     CREATE INDEX IF NOT EXISTS idx_signups_ts ON signups(ts);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_signups_token ON signups(confirm_token) WHERE confirm_token IS NOT NULL;
   `);
   console.log('[db] migrated signups table to dynamic-fields schema (old rows dropped)');
+}
+
+// additive migration: email confirmation columns
+const signupColsNow = new Set(db.prepare('PRAGMA table_info(signups)').all().map((c) => c.name));
+if (!signupColsNow.has('confirmed')) {
+  db.exec('ALTER TABLE signups ADD COLUMN confirmed INTEGER NOT NULL DEFAULT 0');
+  db.exec('ALTER TABLE signups ADD COLUMN confirm_token TEXT');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_signups_token ON signups(confirm_token) WHERE confirm_token IS NOT NULL');
+  console.log('[db] added email confirmation columns to signups');
 }
