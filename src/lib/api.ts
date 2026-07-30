@@ -1,4 +1,4 @@
-export type ThemeId = 'rustic' | 'coastal' | 'forest' | 'dusk' | 'minimal';
+export type ThemeId = 'rustic' | 'coastal' | 'forest' | 'dusk' | 'minimal' | 'sand';
 
 export type EmailConfig = {
   from: string;

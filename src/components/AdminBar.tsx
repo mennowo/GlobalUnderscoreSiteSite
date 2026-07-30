@@ -7,6 +7,7 @@ const THEME_PRESETS: { id: ThemeId; label: string; swatch: string }[] = [
   { id: 'forest',   label: 'Forest',   swatch: '#4A8C42' },
   { id: 'dusk',     label: 'Dusk',     swatch: '#9B4ABF' },
   { id: 'minimal',  label: 'Minimal',  swatch: '#1A1A1A' },
+  { id: 'sand',     label: 'Sand',     swatch: '#BA8214' },
 ];
 
 type Props = {

@@ -76,6 +76,20 @@
   --grad-o3: 0.12;
 }
 
+[data-theme="sand"] {
+  /* Sand — pale straw yellow base, deep gold accent, amber secondary */
+  --color-cream:      248 242 208;
+  --color-sand:       240 230 190;
+  --color-coral:      186 130  20;
+  --color-terracotta: 150 100  10;
+  --color-sage:       200 128  40;
+  --color-ink:         50  36   8;
+  --color-mustard:    212 162  30;
+  --grad-o1: 0.18;
+  --grad-o2: 0.22;
+  --grad-o3: 0.14;
+}
+
 /* ── base ───────────────────────────────────────────────────────────────── */
 @layer base {
   html {
