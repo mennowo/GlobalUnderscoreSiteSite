@@ -94,6 +94,34 @@ export default function EmailSettingsPanel({ email, edit, onClose }: Props) {
             </div>
           </div>
 
+          <div className="border-t border-ink/10 pt-6">
+            <h3 className="font-display text-lg mb-4">Admin notification email</h3>
+            <p className="text-xs text-ink/50 mb-4">
+              Sent to the listed addresses each time someone confirms their signup. Leave "To" blank to disable.
+              Max 10 notifications per hour (server-side guard against abuse).
+              Available placeholders: <code className="bg-sand/60 px-1 rounded">{'{{name}}'}</code>, <code className="bg-sand/60 px-1 rounded">{'{{totalSignups}}'}</code>, <code className="bg-sand/60 px-1 rounded">{'{{confirmedSignups}}'}</code>
+            </p>
+            <div className="flex flex-col gap-4">
+              <Field
+                label="To (comma-separated)"
+                value={email.adminNotification.to}
+                onChange={(v) => set(['adminNotification', 'to'], v)}
+                hint="E.g. alice@example.com, bob@example.com — leave blank to disable."
+              />
+              <Field
+                label="Subject"
+                value={email.adminNotification.subject}
+                onChange={(v) => set(['adminNotification', 'subject'], v)}
+              />
+              <Field
+                label="Body"
+                value={email.adminNotification.body}
+                onChange={(v) => set(['adminNotification', 'body'], v)}
+                multiline
+              />
+            </div>
+          </div>
+
           <p className="text-xs text-ink/40 border-t border-ink/10 pt-4">
             Changes are saved when you click <strong>save</strong> in the admin bar.
           </p>

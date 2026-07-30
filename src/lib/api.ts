@@ -4,6 +4,7 @@ export type EmailConfig = {
   from: string;
   confirmation: { subject: string; body: string };
   welcome: { subject: string; body: string };
+  adminNotification: { to: string; subject: string; body: string };
 };
 
 export type Content = {

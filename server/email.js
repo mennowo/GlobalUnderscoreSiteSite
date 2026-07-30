@@ -15,6 +15,20 @@ function interpolate(tmpl, vars) {
   return String(tmpl ?? '').replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? '');
 }
 
+// Rolling window: max 10 admin notification batches per hour across all IPs.
+// Resets on server restart — the IP rate limiter on /api/confirm is the primary defence.
+const _adminNotifTs = [];
+const ADMIN_NOTIF_MAX_PER_HOUR = 10;
+
+function adminNotifAllowed() {
+  const now = Date.now();
+  const cutoff = now - 60 * 60 * 1000;
+  while (_adminNotifTs.length && _adminNotifTs[0] < cutoff) _adminNotifTs.shift();
+  if (_adminNotifTs.length >= ADMIN_NOTIF_MAX_PER_HOUR) return false;
+  _adminNotifTs.push(now);
+  return true;
+}
+
 export async function sendConfirmationEmail(signup, token, emailCfg, baseUrl) {
   const name = signup.data?.name || 'there';
   const confirmUrl = `${baseUrl}/api/confirm/${token}`;
@@ -36,6 +50,29 @@ export async function sendWelcomeEmail(signup, emailCfg) {
     text: interpolate(emailCfg.welcome.body, { name }),
   });
   if (error) throw new Error(error.message || 'send failed');
+}
+
+export async function sendAdminNotificationEmail(emailCfg, name, totalSignups, confirmedSignups) {
+  const toList = (emailCfg.adminNotification?.to || '')
+    .split(',')
+    .map((e) => e.trim())
+    .filter(Boolean);
+  if (!toList.length) return;
+  if (!adminNotifAllowed()) {
+    console.warn('[email] admin notification rate limit reached, skipping');
+    return;
+  }
+  const vars = { name, totalSignups: String(totalSignups), confirmedSignups: String(confirmedSignups) };
+  const cfg = emailCfg.adminNotification;
+  for (const to of toList) {
+    const { error } = await client().emails.send({
+      from: emailCfg.from,
+      to,
+      subject: interpolate(cfg.subject, vars),
+      text: interpolate(cfg.body, vars),
+    });
+    if (error) throw new Error(error.message || 'send failed');
+  }
 }
 
 export async function sendBroadcast({ from, recipients, subject, body }) {

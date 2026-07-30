@@ -21,6 +21,11 @@ export const defaultContent = {
       subject: "You're confirmed — Global Underscore Vienna",
       body: "Hi {{name}},\n\nYou're all confirmed for the Global Underscore Vienna on Saturday, 20 June 2026!\n\nHere's what you need to know:\n\n• Date: Saturday, 20 June 2026\n• Talk (required for first-timers): 15:00 – 16:00\n• Dance: 16:00 – 20:00\n• Venue: Samdrubling, Beispielgasse 12, 1070 Vienna\n• Price: €25 at the door (cash or card)\n\nWear what lets you move. Bring water, a layer, and an open spirit.\n\nSee you there!\n\nThe Global Underscore team",
     },
+    adminNotification: {
+      to: '',
+      subject: 'New confirmation: {{name}}',
+      body: '{{name}} just confirmed their signup.\n\nTotal signups: {{totalSignups}}\nConfirmed: {{confirmedSignups}}',
+    },
   },
   footer: {
     brand: '◯ Global Underscore · Vienna',

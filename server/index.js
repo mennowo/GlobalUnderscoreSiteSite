@@ -21,6 +21,7 @@ import {
   sendConfirmationEmail,
   sendWelcomeEmail,
   sendBroadcast,
+  sendAdminNotificationEmail,
 } from './email.js';
 import { issueChallenge, verifyChallenge } from './captcha.js';
 import { saveUpload, UPLOADS_DIR, UPLOAD_LIMIT } from './uploads.js';
@@ -268,6 +269,16 @@ app.get('/api/confirm/:token', confirmLimiter, async (req, res) => {
     if (isEmailConfigured() && content.email?.from && content.email?.welcome && signup.data?.email) {
       sendWelcomeEmail(signup, content.email).catch((err) => {
         console.error('[email] welcome send failed:', err.message);
+      });
+    }
+    if (isEmailConfigured() && content.email?.from && content.email?.adminNotification?.to) {
+      sendAdminNotificationEmail(
+        content.email,
+        signup.data?.name || 'someone',
+        countSignups(),
+        countConfirmedSignups(),
+      ).catch((err) => {
+        console.error('[email] admin notification send failed:', err.message);
       });
     }
     res.redirect('/?confirmed=1');
