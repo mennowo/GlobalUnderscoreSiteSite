@@ -401,6 +401,14 @@ function FieldToolbar({
       list[idx] = { ...list[idx], required: !list[idx].required };
     });
 
+  const toggleObligatory = () =>
+    edit.updateDraft((d) => {
+      const list = d.signup.fields || [];
+      const idx = list.findIndex((x) => x.id === field.id);
+      if (idx < 0) return;
+      list[idx] = { ...list[idx], obligatory: !list[idx].obligatory };
+    });
+
   return (
     <div className="flex items-center flex-wrap gap-2 mb-2 text-xs text-ink/60">
       <select
@@ -414,15 +422,27 @@ function FieldToolbar({
           </option>
         ))}
       </select>
-      <label className="inline-flex items-center gap-1.5 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={!!field.required}
-          onChange={toggleRequired}
-          className="accent-coral"
-        />
-        required
-      </label>
+      {field.kind === 'checkbox' ? (
+        <label className="inline-flex items-center gap-1.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!!field.obligatory}
+            onChange={toggleObligatory}
+            className="accent-coral"
+          />
+          must be checked
+        </label>
+      ) : (
+        <label className="inline-flex items-center gap-1.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!!field.required}
+            onChange={toggleRequired}
+            className="accent-coral"
+          />
+          required
+        </label>
+      )}
       <span className="text-ink/30">·</span>
       <button
         type="button"
@@ -503,6 +523,7 @@ function FieldControl({
           type="checkbox"
           checked={!!value}
           onChange={(e) => onChange(e.target.checked)}
+          required={field.obligatory}
           className="mt-1 w-5 h-5 shrink-0 accent-coral"
         />
         <span className="text-ink/80">

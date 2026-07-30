@@ -103,6 +103,7 @@ export type SignupField = {
   label: string;
   note?: string;
   required?: boolean;
+  obligatory?: boolean;
   options?: SignupRadioOption[];
 };
 
